@@ -12,8 +12,9 @@ class UserEntity(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID = UUID.randomUUID(),
 
-    @Column(unique = true)
-    val email: String = "",
+    @Column(name="username",unique = true)
+    @JvmField
+    val username: String = "",
 
     @Column
     private val password: String = "",
@@ -30,7 +31,7 @@ class UserEntity(
         return password
     }
     override fun getUsername(): String {
-        return email
+        return username
     }
 
     override fun isAccountNonExpired(): Boolean {

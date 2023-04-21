@@ -1,10 +1,12 @@
 package es.unizar.mii.tmdad.tahc.config
 
+import es.unizar.mii.tmdad.tahc.entity.Role
 import es.unizar.mii.tmdad.tahc.entity.UserEntity
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import org.slf4j.LoggerFactory
 import org.springframework.cglib.core.internal.Function
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -13,9 +15,19 @@ import javax.crypto.SecretKey
 
 @Service
 class JwtService {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun extractUserEmail(token: String): String? {
+    fun extractSubject(token: String): String? {
         return extractClaim(token, Claims::getSubject)
+    }
+
+    fun extractUser(token: String): UserDetails? {
+        val claims: Claims = extractAllClaims(token)
+        return UserEntity(
+            id = UUID.fromString(claims["user_id"].toString()),
+            username = extractClaim(token, Claims::getSubject),
+            role = Role.USER
+        )
     }
 
     fun <T> extractClaim(token: String, claimsResolver: Function<Claims, T>): T {
@@ -24,7 +36,7 @@ class JwtService {
     }
 
     fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
-        val userEmail = extractUserEmail(token)
+        val userEmail = extractSubject(token)
         return userEmail == userDetails.username && !isTokenExpired(token)
     }
 
@@ -39,7 +51,7 @@ class JwtService {
     fun generateToken(user: UserEntity): String {
         return generateToken(
             hashMapOf(
-                "id" to user.id,
+                "user_id" to user.id,
                 "role" to user.role
             ), user)
     }

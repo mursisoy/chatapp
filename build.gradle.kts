@@ -19,14 +19,14 @@ dependencies {
     implementation("org.passay:passay:1.6.3")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    implementation("org.springframework.security:spring-security-messaging")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.security:spring-security-oauth2-resource-server")
-    implementation("org.springframework.security:spring-security-oauth2-jose")
     implementation("org.springframework.security:spring-security-config")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")

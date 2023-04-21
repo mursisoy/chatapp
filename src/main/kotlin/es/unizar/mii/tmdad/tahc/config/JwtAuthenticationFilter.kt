@@ -3,10 +3,10 @@ package es.unizar.mii.tmdad.tahc.config
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -14,8 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JwtAuthenticationFilter(
     private val jwtService: JwtService,
-    private val userDetailService: UserDetailsService
 ) : OncePerRequestFilter() {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -29,9 +30,11 @@ class JwtAuthenticationFilter(
         }
 
         val jwt: String = authHeader.substring(7)
-        val userEmail = jwtService.extractUserEmail(jwt)
-        if (userEmail!!.isNotEmpty() && SecurityContextHolder.getContext().authentication == null) {
-            val userDetails: UserDetails = userDetailService.loadUserByUsername(userEmail)
+        val username = jwtService.extractSubject(jwt)
+        val userDetails: UserDetails? = jwtService.extractUser(jwt)
+        logger.info(userDetails!!.username)
+        if (username!!.isNotEmpty() && SecurityContextHolder.getContext().authentication == null) {
+//            val userDetails: UserDetails = userDetailService.loadUserByUsername(userEmail)
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 val authToken = UsernamePasswordAuthenticationToken(
                     userDetails,

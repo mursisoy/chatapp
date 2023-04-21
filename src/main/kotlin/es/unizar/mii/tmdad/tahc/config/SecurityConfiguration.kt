@@ -1,8 +1,5 @@
 package es.unizar.mii.tmdad.tahc.config
 
-
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationProvider
@@ -17,7 +14,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 
 @Configuration
-@ConfigurationPropertiesScan
 @EnableWebSecurity
 class SecurityConfiguration(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
@@ -28,15 +24,17 @@ class SecurityConfiguration(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
         http
-            .csrf().ignoringRequestMatchers(toH2Console())
-            .disable()
+            .csrf()
+//            .ignoringRequestMatchers(toH2Console())
+            .ignoringRequestMatchers("/api/v1/auth/**")
+            .and()
             .headers().frameOptions().sameOrigin()
             .and()
             .authorizeHttpRequests()
-            .requestMatchers("/api/v1/auth/**")
+            .requestMatchers("/api/v1/auth/**", "/csrf", "/ws")
             .permitAll()
-            .requestMatchers(toH2Console())
-            .permitAll()
+//            .requestMatchers(toH2Console())
+//            .permitAll()
             .anyRequest()
             .authenticated()
             .and()

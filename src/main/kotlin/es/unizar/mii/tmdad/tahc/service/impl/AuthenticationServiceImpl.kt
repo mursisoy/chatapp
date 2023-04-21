@@ -24,7 +24,7 @@ class AuthenticationServiceImpl(
 ) : AuthenticationService {
     override fun register(registerRequest: RegisterRequest): AuthenticationResponse {
         val user = UserEntity(
-            email = registerRequest.username,
+            username = registerRequest.username,
             password = passwordEncoder.encode(registerRequest.password),
             role = Role.USER
         )
@@ -49,7 +49,7 @@ class AuthenticationServiceImpl(
         )
 
         val user =
-            userRepository.findByEmail(authenticationRequest.username) ?: throw UserNotFoundException("User nor found")
+            userRepository.findByUsername(authenticationRequest.username) ?: throw UserNotFoundException("User nor found")
 
         val jwt = jwtService.generateToken(user)
         return AuthenticationResponse(
