@@ -41,4 +41,24 @@ class ApplicationConfig(
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
     }
+    
+    
+
+    //Configuracion del rabbit a modificar segun donde se aloje
+    @Bean
+    fun channel() : Channel {
+        val factory = ConnectionFactory()
+        // "guest"/"guest" by default, limited to localhost connections
+        // "guest"/"guest" by default, limited to localhost connections
+        //factory.setUsername(userName) -> guest
+        //factory.setPassword(password) -> guest
+        //factory.setVirtualHost(virtualHost) -> /
+        //factory.setHost("localhost") -> localhost
+        //factory.setPort(portNumber) -> 5672
+
+        val conn: Connection = factory.newConnection()
+
+        return conn.createChannel()
+
+    }
 }
