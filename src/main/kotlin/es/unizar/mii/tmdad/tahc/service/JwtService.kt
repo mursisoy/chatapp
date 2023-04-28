@@ -1,4 +1,4 @@
-package es.unizar.mii.tmdad.tahc.config
+package es.unizar.mii.tmdad.tahc.service
 
 import es.unizar.mii.tmdad.tahc.entity.Role
 import es.unizar.mii.tmdad.tahc.entity.UserEntity
@@ -6,7 +6,6 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
-import org.slf4j.LoggerFactory
 import org.springframework.cglib.core.internal.Function
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -15,8 +14,6 @@ import javax.crypto.SecretKey
 
 @Service
 class JwtService {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     fun extractSubject(token: String): String? {
         return extractClaim(token, Claims::getSubject)
     }
@@ -26,7 +23,7 @@ class JwtService {
         return UserEntity(
             id = UUID.fromString(claims["user_id"].toString()),
             username = extractClaim(token, Claims::getSubject),
-            role = Role.USER
+            role = enumValueOf<Role>(claims["role"].toString())
         )
     }
 

@@ -1,6 +1,6 @@
 package es.unizar.mii.tmdad.tahc.config
 
-import es.unizar.mii.tmdad.tahc.service.impl.JwtServiceImpl
+import es.unizar.mii.tmdad.tahc.service.JwtService
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class AuthenticationChannelInterceptor(private val jwtServiceImpl: JwtServiceImpl) : ChannelInterceptor {
+class AuthenticationChannelInterceptor(private val jwtService: JwtService) : ChannelInterceptor {
     private val logger = LoggerFactory.getLogger(javaClass)
     override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
         val headerAccessor = MessageHeaderAccessor.getAccessor(message) as StompHeaderAccessor
@@ -28,10 +28,10 @@ class AuthenticationChannelInterceptor(private val jwtServiceImpl: JwtServiceImp
                 return message
             }
             val jwt: String = authHeader.substring(7)
-            val username = jwtServiceImpl.extractSubject(jwt)
-            val userDetails: UserDetails? = jwtServiceImpl.extractUser(jwt)
+            val username = jwtService.extractSubject(jwt)
+            val userDetails: UserDetails? = jwtService.extractUser(jwt)
             if (userDetails != null && username!!.isNotEmpty()) {
-                if (jwtServiceImpl.isTokenValid(jwt, userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
                     val authToken = UsernamePasswordAuthenticationToken(
                         username,
                         null,
