@@ -12,7 +12,7 @@
       <option name="LOCAL" value="false" />
     </RunnerSettings>
     <method v="2">
-      <option name="com.intellij.docker.debug.DockerBeforeRunTask" compose-service="backend" run-config="docker-compose-debug.yml: Compose Deployment" />
+      <option name="com.intellij.docker.debug.DockerBeforeRunTask" compose-service="backend" run-config="DockerComposeDev" />
     </method>
   </configuration>
 </component>
