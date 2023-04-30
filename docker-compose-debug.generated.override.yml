@@ -1,0 +1,6 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.0"
+services:
+  backend:
+    ports:
+    - "8000:8000"

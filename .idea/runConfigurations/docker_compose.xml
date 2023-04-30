@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="docker compose" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="envFilePath" value="" />
+        <option name="sourceFilePath" value="docker-compose.yml" />
+      </settings>
+    </deployment>
+    <method v="2">
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="bootBuildImage" externalProjectPath="$PROJECT_DIR$/chatapp-backend" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="npmBuild" externalProjectPath="$PROJECT_DIR$/chatapp-frontend" vmOptions="" scriptParameters="" />
+    </method>
+  </configuration>
+</component>
