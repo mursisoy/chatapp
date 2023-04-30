@@ -1,6 +1,6 @@
 HELP.md
 .gradle
-build/
+chatapp-backend/build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -18,7 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
+no.idea
 *.iws
 *.iml
 *.ipr

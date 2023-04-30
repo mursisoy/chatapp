@@ -1,1 +1,4 @@
-rootProject.name = "tahc"
+
+rootProject.name = "chatapp"
+
+include("chatapp-backend")
