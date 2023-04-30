@@ -1,0 +1,37 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "18080:8080"
+
+  caddy:
+      image: caddy:2.6.4
+      restart: unless-stopped
+      volumes:
+        - $PWD/caddy/Caddyfile_debug:/etc/caddy/Caddyfile
+      ports:
+        - "80:80"
+        - "443:443"
+
+  frontend:
+      build:
+        context: ./chatapp-frontend
+        dockerfile: Dockerfile
+      volumes:
+        - type: bind
+          source: ./chatapp-frontend
+          target: /app
+
+  backend:
+    image: chatapp-backend:0.0.1-SNAPSHOT-debug
+    environment:
+      BPL_DEBUG_ENABLED: true

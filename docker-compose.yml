@@ -1,0 +1,24 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+  caddy:
+    image: caddy:2.6.4
+    restart: unless-stopped
+    volumes:
+      - $PWD/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/chatapp-frontend/dist:/app
+    ports:
+      - "80:80"
+      - "443:443"
+  backend:
+    image: chatapp-backend:0.0.1-SNAPSHOT
