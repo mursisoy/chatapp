@@ -25,7 +25,7 @@ services:
   frontend:
       build:
         context: ./chatapp-frontend
-        dockerfile: Dockerfile
+        dockerfile: Dockerfile_dev
       volumes:
         - type: bind
           source: ./chatapp-frontend
