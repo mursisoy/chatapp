@@ -30,7 +30,7 @@ class RabbitController(private val channel: Channel) {
     fun sendMessage() {
         val exchangeName="exchange"
         //realmente seria idUser-exchange
-        val routingKey=null
+        val routingKey=""
 
         val messageBodyBytes = "Hello, world!".toByteArray()
         channel.basicPublish(exchangeName, routingKey, null, messageBodyBytes)
