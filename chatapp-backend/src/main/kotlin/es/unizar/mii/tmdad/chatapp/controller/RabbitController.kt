@@ -38,7 +38,7 @@ class RabbitController(private val channel: Channel) {
 
 
     @PostMapping("/newChat")
-    fun createNewChat(infoChat: NewChatRequest) {
+    fun createNewChat(@RequestBody infoChat: NewChatRequest) {
         //crear exchange con idSala
         channel.exchangeDeclare(infoChat.idSala, "fanout", true);
             //el idSala sera igual a un numeor aleatorioa concatenado con : al id del
@@ -52,7 +52,7 @@ class RabbitController(private val channel: Channel) {
     }
 
     @PostMapping("/updateChat")
-    fun updateChat(infoUpdate: UpdateChatRequest) {
+    fun updateChat(@RequestBody infoUpdate: UpdateChatRequest) {
         if (infoUpdate.origin == infoUpdate.idSala.split(":")[1]) {
             if (infoUpdate.idSala.split(":")[2] == "grupo") {
                 if (infoUpdate.action == "delete") {
@@ -63,7 +63,7 @@ class RabbitController(private val channel: Channel) {
                 }
                 if (infoUpdate.action == "add") {
                     for (user in infoUpdate.usersAffected) {
-                        channel.exchangeBind(user, infoUpdate.idSala, null)
+                        channel.exchangeBind(user+ "Exchange", infoUpdate.idSala, null)
                     }
                 }
             }
@@ -71,7 +71,7 @@ class RabbitController(private val channel: Channel) {
     }
 
     @PostMapping("/deleteChat")
-    fun deleteChat(infoDelete: DeleteChatRequest) {
+    fun deleteChat(@RequestBody  infoDelete: DeleteChatRequest) {
         //borrar exchange de la sala si eres el propietario
         if (infoDelete.idSala.split(":")[2] == "grupo") {
             if (infoDelete.origin == infoDelete.idSala.split(":")[1]) {

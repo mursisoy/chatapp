@@ -15,10 +15,18 @@ services:
     image: caddy:2.6.4
     restart: unless-stopped
     volumes:
-      - $PWD/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - $PWD/chatapp-frontend/dist:/app
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./chatapp-frontend/dist:/app
     ports:
       - "80:80"
       - "443:443"
   backend:
     image: chatapp-backend:0.0.1-SNAPSHOT
+
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"

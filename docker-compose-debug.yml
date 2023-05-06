@@ -17,7 +17,7 @@ services:
       image: caddy:2.6.4
       restart: unless-stopped
       volumes:
-        - $PWD/caddy/Caddyfile_debug:/etc/caddy/Caddyfile
+        - ./caddy/Caddyfile_debug:/etc/caddy/Caddyfile
       ports:
         - "80:80"
         - "443:443"
@@ -40,5 +40,5 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"

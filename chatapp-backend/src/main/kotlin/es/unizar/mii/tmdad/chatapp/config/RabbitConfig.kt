@@ -17,7 +17,7 @@ class RabbitConfig {
         //factory.setUsername(userName) -> guest
         //factory.setPassword(password) -> guest
         //factory.setVirtualHost(virtualHost) -> /
-        factory.setHost("rabbitmq") //-> localhost
+        factory.host = "rabbitmq" //-> localhost
         //factory.setPort(portNumber) -> 5672
 
         val conn: Connection = factory.newConnection()

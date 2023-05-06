@@ -63,6 +63,7 @@ tasks.register<BootBuildImage>("bootDebugBuildImage") {
     environment.set(mapOf(
         "BPL_DEBUG_ENABLED" to "true"
     ))
+    verboseLogging.set(true)
     dependsOn(tasks.bootWar)
     archiveFile.set(tasks.bootWar.get().archiveFile.get().asFile)
     imageName.set(ImageReference.of(ImageName.of(project.name),"${project.version}-debug").toString())
