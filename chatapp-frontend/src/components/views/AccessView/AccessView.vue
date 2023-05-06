@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import { computed } from "vue";
+import {computed} from "vue";
 
 import LoginForm from "@src/components/views/AccessView/LoginForm.vue";
 import RegisterForm from "@src/components/views/AccessView/RegisterForm/RegisterForm.vue";
@@ -8,13 +8,14 @@ import Cover from "@src/components/views/AccessView/Cover.vue";
 import FadeTransition from "@src/components/ui/transitions/FadeTransition.vue";
 
 const route = useRoute();
-
 const ActiveMethod = computed(() => {
-  if (route.params.method === "sign-up") {
-    return RegisterForm;
-  } else if (route.params.method === "sign-in") {
-    return LoginForm;
-  }
+    if (route.params.method === "sign-up") {
+      return RegisterForm;
+    } else if (route.params.method === "sign-in") {
+      return LoginForm;
+    } else {
+      return LoginForm;
+    }
 });
 </script>
 

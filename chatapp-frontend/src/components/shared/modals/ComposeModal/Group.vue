@@ -17,6 +17,7 @@ const activePageName = ref("group-info");
 const ActivePage = computed(() => {
   if (activePageName.value === "group-info") return GroupInfo;
   else if (activePageName.value === "group-members") return GroupMembers;
+  else return GroupMembers;
 });
 
 // event to move between modal pages

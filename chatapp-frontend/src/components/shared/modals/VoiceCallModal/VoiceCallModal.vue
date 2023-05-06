@@ -34,6 +34,9 @@ const ActiveComponent = computed(() => {
     } else if (store?.activeCall.status === "ongoing") {
       modalSize.value = "400px";
       return Ongoing;
+    } else {
+      modalSize.value = "290px";
+      return Dialing;
     }
   } else {
     return "div";

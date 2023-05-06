@@ -26,6 +26,8 @@ const ActivePage = computed(() => {
     return CallInfo;
   } else if (activePageName.value === "call-members") {
     return CallMembers;
+  } else {
+    return CallInfo;
   }
 });
 

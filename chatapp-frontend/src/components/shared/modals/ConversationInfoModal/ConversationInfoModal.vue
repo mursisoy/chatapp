@@ -35,6 +35,7 @@ const ActivePage = computed(() => {
   else if (activePageName.value === "group-member") return ConversationInfo;
   else if (activePageName.value === "shared-media") return SharedMedia;
   else if (activePageName.value === "edit-group") return EditGroupInfo;
+  else return ConversationInfo;
 });
 
 // (event) move between modal pages

@@ -24,6 +24,8 @@ const ActiveComponent = computed(() => {
     return Calls;
   } else if (store.activeSidebarComponent === "settings") {
     return Settings;
+  } else {
+    return Conversations;
   }
 });
 </script>

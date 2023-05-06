@@ -21,8 +21,11 @@ const ActiveSection = computed(() => {
     return PersonalSection;
   } else if (activeSectionName.value === "password-section") {
     return PasswordSection;
+  } else {
+    return PersonalSection
   }
 });
+
 
 // (event) to move between modal pages
 const changeActiveSection = (event: {
