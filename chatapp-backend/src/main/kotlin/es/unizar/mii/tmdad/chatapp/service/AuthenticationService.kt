@@ -37,14 +37,14 @@ class AuthenticationService(
 
         val exchangeName=registerRequest.username+"Exchange"
         val queueName=registerRequest.username+"Queue"
-        val routingKey=""
+        val routingKey="*"
 
         channel.exchangeDeclare(exchangeName, "direct", true);
         channel.queueDeclare(queueName, true, false, false, null);
         channel.queueBind(queueName, exchangeName, routingKey);
 
         //Bind con el exchange broadcast (solo podran enviar mensajes los usuarios con ROLE=superuser)
-        channel.exchangeBind(exchangeName, "broadcast", "")
+        channel.exchangeBind(exchangeName, "broadcast", "*")
 
         val jwt = jwtService.generateToken(user)
 
