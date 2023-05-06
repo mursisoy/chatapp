@@ -46,7 +46,7 @@ class RabbitController(private val channel: Channel) {
 
         //crear binding entre el exchange de la sala y el de los usuarios pertenecientes a esta
         for (user in infoChat.userOfGroup) {
-            channel.exchangeBind(user + "Exchange", infoChat.idSala, null)
+            channel.exchangeBind(user + "Exchange", infoChat.idSala, "")
         }
 
     }
@@ -58,12 +58,12 @@ class RabbitController(private val channel: Channel) {
                 if (infoUpdate.action == "delete") {
                     for (user in infoUpdate.usersAffected) {
                         //unbindings
-                        channel.exchangeUnbind(user + "Exchange", infoUpdate.idSala, null)
+                        channel.exchangeUnbind(user + "Exchange", infoUpdate.idSala, "")
                     }
                 }
                 if (infoUpdate.action == "add") {
                     for (user in infoUpdate.usersAffected) {
-                        channel.exchangeBind(user+ "Exchange", infoUpdate.idSala, null)
+                        channel.exchangeBind(user+ "Exchange", infoUpdate.idSala, "")
                     }
                 }
             }
