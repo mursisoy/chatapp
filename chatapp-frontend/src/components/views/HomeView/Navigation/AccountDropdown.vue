@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import useStore from "@src/store/store";
+import {useAuthStore} from "@src/store/auth";
 
 import {
   ArrowLeftOnRectangleIcon,
@@ -9,6 +10,7 @@ import {
 import Dropdown from "@src/components/ui/navigation/Dropdown/Dropdown.vue";
 import DropdownLink from "@src/components/ui/navigation/Dropdown/DropdownLink.vue";
 import { RouterLink } from "vue-router";
+import router from "@src/router";
 
 const props = defineProps<{
   showDropdown: boolean;
@@ -18,6 +20,11 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
+const authStore = useAuthStore();
+
+const logout = async () => {
+  await authStore.logout();
+}
 
 // (event) close dropdown menu when clicking outside
 const handleCloseOnClickOutside = (event: Event) => {
@@ -98,6 +105,7 @@ const handleCloseOnClickOutside = (event: Event) => {
         color="danger"
       >
         <RouterLink
+            @click="logout"
           to="/access/sign-in/"
           class="w-full flex items-center justify-start"
         >
