@@ -2,22 +2,30 @@
 import Button from "@src/components/ui/inputs/Button.vue";
 import TextInput from "@src/components/ui/inputs/TextInput.vue";
 import Typography from "@src/components/ui/data-display/Typography.vue";
+import {IUserSignUp} from "@src/types";
+const props = defineProps<{
+  modelValue: IUserSignUp
+}>()
+const emit = defineEmits(['update:modelValue','activeSectionChange']);
 </script>
 
 <template>
   <div>
     <!--form-->
     <div class="mb-5">
-      <TextInput label="Email" placeholder="Enter your email" class="mb-5" />
+      <TextInput label="Email" placeholder="Enter your email" class="mb-5" :value="modelValue.email"
+                 @input="$emit('update:modelValue', {...modelValue, email: $event.target.value})"/>
       <TextInput
         label="First Name"
         placeholder="Enter your first name"
-        class="mb-5"
+        class="mb-5" :value="modelValue.name"
+        @input="$emit('update:modelValue', {...modelValue,name: $event.target.value})"
       />
       <TextInput
         label="Last Name"
         placeholder="Enter your last name"
-        class="mb-5"
+        class="mb-5" :value="modelValue.lastname"
+        @input="$emit('update:modelValue', {...modelValue,lastname: $event.target.value})"
       />
     </div>
 
@@ -25,6 +33,7 @@ import Typography from "@src/components/ui/data-display/Typography.vue";
     <div class="mb-6">
       <Button
         class="w-full mb-4"
+        type="button"
         @click="
           $emit('active-section-change', {
             sectionName: 'password-section',
@@ -49,7 +58,7 @@ import Typography from "@src/components/ui/data-display/Typography.vue";
     </div>
 
     <!--oauth controls-->
-    <Button variant="outlined" class="w-full mb-5">
+    <Button variant="outlined" class="w-full mb-5" type="button">
       <span class="flex">
         <img
           src="@src/assets/vectors/google-logo.svg"

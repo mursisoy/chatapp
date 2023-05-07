@@ -109,3 +109,11 @@ export interface IEmoji {
   r?: string;
   v?: string[];
 }
+
+export interface IUserSignUp {
+  email: string;
+  name: string;
+  lastname: string;
+  password: string;
+  passwordConfirmation: string;
+}

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import router from "@src/router";
 import {fetchWrapper} from "@src/helpers/fetchWrapper";
 import jwt_decode from "jwt-decode";
+import {IUserSignUp} from "@src/types";
 
 interface  State {
     user: any | null,
@@ -37,9 +38,9 @@ export const useAuthStore = defineStore("auth", {
             // redirect to previous url or default to home page
             await router.push('/chat/all');
         },
-        async register(username: string, password: string, passwordConfirmation: string) {
+        async register(user: IUserSignUp) {
             const res = await fetchWrapper.post(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/auth/register`,
-                { username, password, passwordConfirmation }
+                user
             );
 
             this.token = res
@@ -47,7 +48,6 @@ export const useAuthStore = defineStore("auth", {
             localStorage.setItem('token', JSON.stringify(this.token))
             localStorage.setItem('user', JSON.stringify(this.user))
             // await this.fetchUser()
-            await router.push('/chat/all')
         },
         async login(username: string, password: string) {
             const res = await fetchWrapper.post(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/auth/login`,

@@ -5,9 +5,15 @@ import { EyeSlashIcon, EyeIcon } from "@heroicons/vue/24/outline";
 import IconButton from "@src/components/ui/inputs/IconButton.vue";
 import TextInput from "@src/components/ui/inputs/TextInput.vue";
 import Button from "@src/components/ui/inputs/Button.vue";
+import {IUserSignUp} from "@src/types";
 
 const showPassword = ref(false);
 const showPasswordConfirm = ref(false);
+
+const props = defineProps<{
+  modelValue: IUserSignUp
+}>()
+const emit = defineEmits(['update:modelValue','activeSectionChange']);
 </script>
 
 <template>
@@ -19,7 +25,8 @@ const showPasswordConfirm = ref(false);
         placeholder="Enter your password"
         :type="showPassword ? 'text' : 'password'"
         class="pr-[40px] mb-5"
-      >
+        :value="modelValue.password"
+        @input="$emit('update:modelValue', {...modelValue, password: $event.target.value})">
         <template v-slot:endAdornment>
           <IconButton
             title="toggle password visibility"
@@ -43,7 +50,8 @@ const showPasswordConfirm = ref(false);
         label="Confirm Password"
         placeholder="Enter your password"
         :type="showPasswordConfirm ? 'text' : 'password'"
-      >
+        :value="modelValue.passwordConfirmation"
+        @input="$emit('update:modelValue', {...modelValue, passwordConfirmation: $event.target.value})">
         <template v-slot:endAdornment>
           <IconButton
             title="toggle password visibility"
@@ -66,7 +74,7 @@ const showPasswordConfirm = ref(false);
 
     <!--controls-->
     <div class="mb-5">
-      <Button class="w-full mb-4">Sign up</Button>
+      <Button class="w-full mb-4"  type="submit">Sign up</Button>
       <Button
         variant="outlined"
         class="w-full"
@@ -76,6 +84,7 @@ const showPasswordConfirm = ref(false);
             animationName: 'slide-right',
           })
         "
+        type="button"
       >
         Back
       </Button>

@@ -6,6 +6,9 @@ import SlideTransition from "@src/components/ui/transitions/SlideTransition.vue"
 import Typography from "@src/components/ui/data-display/Typography.vue";
 import PasswordSection from "@src/components/views/AccessView/RegisterForm/PasswordSection.vue";
 import PersonalSection from "@src/components/views/AccessView/RegisterForm/PersonalSection.vue";
+import {IUserSignUp} from "@src/types";
+import {useAuthStore} from "@src/store/auth";
+import router from "@src/router";
 
 defineEmits(["activeSectionChange"]);
 
@@ -26,7 +29,6 @@ const ActiveSection = computed(() => {
   }
 });
 
-
 // (event) to move between modal pages
 const changeActiveSection = (event: {
   sectionName: string;
@@ -35,6 +37,24 @@ const changeActiveSection = (event: {
   animation.value = event.animationName;
   activeSectionName.value = event.sectionName;
 };
+
+const authStore = useAuthStore()
+const login = async () => {
+  await authStore.register(userSignupFormData.value);
+  await router.push('/')
+}
+const userSignupFormData = ref<IUserSignUp>({
+  email: "",
+  name: "",
+  lastname: "",
+  password: "",
+  passwordConfirmation: ""
+});
+
+const updateModelValue = (data: IUserSignUp) => {
+  userSignupFormData.value = data
+}
+
 </script>
 
 <template>
@@ -55,14 +75,17 @@ const changeActiveSection = (event: {
           Sign in to start using messaging!
         </Typography>
       </div>
-
+      <form @submit.prevent="login">
       <!--form section-->
       <SlideTransition :animation="animation">
         <component
+            v-model="userSignupFormData"
+            v-on:update:modelValue="updateModelValue"
           @active-section-change="changeActiveSection"
           :is="ActiveSection"
         />
       </SlideTransition>
+      </form>
 
       <!--bottom text-->
       <div class="flex justify-center">
