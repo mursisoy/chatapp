@@ -1,14 +1,11 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import router from "@src/router";
+import "@src/style.css";
+import { createPinia } from "pinia";
+import { createApp } from "vue";
+import vClickOutside from "click-outside-vue3";
 
-import App from './App.vue'
-import router from './router'
+import App from "@src/App.vue";
 
-import './assets/main.css'
+const pinia = createPinia();
 
-const app = createApp(App)
-
-app.use(createPinia())
-app.use(router)
-
-app.mount('#app')
+createApp(App).use(pinia).use(router).use(vClickOutside).mount("#app");

@@ -36,7 +36,11 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-
+    
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -59,6 +63,7 @@ tasks.register<BootBuildImage>("bootDebugBuildImage") {
     environment.set(mapOf(
         "BPL_DEBUG_ENABLED" to "true"
     ))
+    verboseLogging.set(true)
     dependsOn(tasks.bootWar)
     archiveFile.set(tasks.bootWar.get().archiveFile.get().asFile)
     imageName.set(ImageReference.of(ImageName.of(project.name),"${project.version}-debug").toString())

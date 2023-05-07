@@ -33,11 +33,10 @@ class AuthenticationChannelInterceptor(private val jwtService: JwtService) : Cha
             if (userDetails != null && username!!.isNotEmpty()) {
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     val authToken = UsernamePasswordAuthenticationToken(
-                        username,
+                        userDetails,
                         null,
                         userDetails.authorities,
                     )
-                    authToken.details = userDetails
                     headerAccessor.user =  authToken
                 }
             }

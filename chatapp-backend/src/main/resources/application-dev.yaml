@@ -1,0 +1,22 @@
+logging:
+  level:
+    sql: DEBUG
+    web: DEBUG
+    org:
+      springframework:
+        security: DEBUG
+
+spring:
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    database-platform: "org.hibernate.dialect.PostgreSQLDialect"
+  datasource:
+    url: "jdbc:postgresql://db:5432/chatapp?createDatabaseIfNotExist=true"
+    driver-class-name: "org.postgresql.Driver"
+    username: "chatapp"
+    password: "chatapp"
+  config:
+    activate:
+      on-profile: "dev"

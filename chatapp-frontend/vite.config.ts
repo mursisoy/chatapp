@@ -1,18 +1,21 @@
-import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from "vite";
+import alias from "@rollup/plugin-alias";
+import vue from "@vitejs/plugin-vue";
+import { resolve } from "path";
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+const rootDir = resolve(__dirname);
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), alias()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      "@src": resolve(rootDir, "src"),
+      "@custom_types": resolve(rootDir, "src/@custom_types"),
+    },
   },
   server: {
     port: 3000,
     host: true
-  },
-})
+  }
+});

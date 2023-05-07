@@ -1,5 +1,4 @@
-import { useAuthStore } from '../stores/auth';
-
+import { useAuthStore } from '@src/store/auth';
 export const fetchWrapper = {
     get: request('GET'),
     post: request('POST'),

@@ -1,58 +1,66 @@
 package es.unizar.mii.tmdad.chatapp.service
 
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.password.PasswordEncoder
+import com.rabbitmq.client.AMQP
+import com.rabbitmq.client.Channel
+import com.rabbitmq.client.DefaultConsumer
+import com.rabbitmq.client.Envelope
 import org.springframework.stereotype.Service
-import es.unizar.mii.tmdad.chatapp.dto.AuthenticationRequest
-import es.unizar.mii.tmdad.chatapp.dto.AuthenticationResponse
-import es.unizar.mii.tmdad.chatapp.dto.RegisterRequest
-import es.unizar.mii.tmdad.chatapp.entity.Role
-import es.unizar.mii.tmdad.chatapp.entity.UserEntity
+import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.exception.UserNotFoundException
 import es.unizar.mii.tmdad.chatapp.repository.UserRepository
-import io.jsonwebtoken.Claims
+import java.io.IOException
 
 @Service
 class AuthenticationService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder,
-    private val jwtService: JwtService,
-    private val authenticationManager: AuthenticationManager
+    private val channel: Channel
 )  {
-    fun register(registerRequest: RegisterRequest): AuthenticationResponse {
-        val user = UserEntity(
-            username = registerRequest.username,
-            password = passwordEncoder.encode(registerRequest.password),
-            role = Role.USER
-        )
+    fun register(user: UserEntity): UserEntity {
+        // Insert the user
+        val newUser = userRepository.save(user)
 
-        userRepository.save(user)
+        val exchangeName=newUser.username+"Exchange"
+        val queueName=newUser.username+"Queue"
+        val routingKey="*"
 
-        val jwt = jwtService.generateToken(user)
+        channel.exchangeDeclare(exchangeName, "direct", true)
+        channel.queueDeclare(queueName, true, false, false, null)
+        channel.queueBind(queueName, exchangeName, routingKey)
 
-        return AuthenticationResponse(
-            accessToken = jwt,
-            expiresAt = jwtService.extractClaim(jwt, Claims::getExpiration).time,
-            type="Bearer"
-        )
+        //Bind con el exchange broadcast (solo podran enviar mensajes los usuarios con ROLE=superuser)
+        channel.exchangeBind(exchangeName, "broadcast", "*")
+
+        return newUser
     }
 
-    fun login(authenticationRequest: AuthenticationRequest): AuthenticationResponse {
-        authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(
-                authenticationRequest.username,
-                authenticationRequest.password
-            )
-        )
+    fun login(user: UserEntity) {
+        val queueName=user.username+"Queue"
 
-        val user =
-            userRepository.findByUsername(authenticationRequest.username) ?: throw UserNotFoundException("User nor found")
+        val autoAck = false
 
-        val jwt = jwtService.generateToken(user)
-        return AuthenticationResponse(
-            accessToken = jwt,
-            expiresAt = jwtService.extractClaim(jwt, Claims::getExpiration).time,
-            type="Bearer")
+        val consumerTag=user.username
+
+        channel.basicConsume(queueName, autoAck, consumerTag,
+            object : DefaultConsumer(channel) {
+                @Throws(IOException::class)
+                override fun handleDelivery(
+                    consumerTag: String?,
+                    envelope: Envelope,
+                    properties: AMQP.BasicProperties,
+                    body: ByteArray?
+                ) {
+                    val routingKey = envelope.routingKey
+                    val contentType = properties.contentType
+                    val deliveryTag = envelope.deliveryTag
+                    // (process the message components here ...)
+                    channel.basicAck(deliveryTag, false)
+
+                }
+            })
     }
+
+    fun loadUserByUsername(username: String): UserEntity{
+        return userRepository.findByUsername(username) ?: throw UserNotFoundException("User nor found")
+    }
+
 }

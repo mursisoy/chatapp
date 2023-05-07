@@ -25,16 +25,12 @@ class SecurityConfiguration(
 
         http
             .csrf()
-//            .ignoringRequestMatchers(toH2Console())
-            .ignoringRequestMatchers("/api/v1/auth/**")
-            .and()
+            .disable()
             .headers().frameOptions().sameOrigin()
             .and()
             .authorizeHttpRequests()
-            .requestMatchers("/api/v1/auth/**", "/csrf", "/ws")
+            .requestMatchers("/api/v1/auth/register","/api/v1/auth/login", "/csrf", "/ws")
             .permitAll()
-//            .requestMatchers(toH2Console())
-//            .permitAll()
             .anyRequest()
             .authenticated()
             .and()
@@ -54,7 +50,7 @@ class SecurityConfiguration(
         corsConfiguration.addAllowedMethod(CorsConfiguration.ALL)
         corsConfiguration.addAllowedHeader((CorsConfiguration.ALL))
 
-        corsConfiguration.addAllowedOrigin("http://localhost:5173")
+        corsConfiguration.addAllowedOrigin("*")
         corsConfiguration.allowCredentials = true
 
         val corsConfigurationSource = UrlBasedCorsConfigurationSource()
@@ -62,17 +58,4 @@ class SecurityConfiguration(
 
         return corsConfigurationSource
     }
-
-//    @Bean
-//    @ConditionalOnProperty(name = ["spring.h2.console.enabled"], havingValue="true")
-//    fun h2ConsoleSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
-//        http
-//            .authorizeHttpRequests()
-//            .requestMatchers(toH2Console())
-//            .permitAll()
-////            .and()
-////            .csrf().ignoringRequestMatchers(toH2Console()).disable()
-////            .and().headers().frameOptions().sameOrigin();
-//        return http.orBuild
-//    }
 }
