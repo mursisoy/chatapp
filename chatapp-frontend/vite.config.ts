@@ -14,4 +14,8 @@ export default defineConfig({
       "@custom_types": resolve(rootDir, "src/@custom_types"),
     },
   },
+  server: {
+    port: 3000,
+    host: true
+  }
 });
