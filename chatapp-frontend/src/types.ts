@@ -117,3 +117,8 @@ export interface IUserSignUp {
   password: string;
   passwordConfirmation: string;
 }
+
+export interface IUserLogin {
+  email: string;
+  password: string;
+}

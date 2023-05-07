@@ -7,8 +7,27 @@ import IconButton from "@src/components/ui/inputs/IconButton.vue";
 import TextInput from "@src/components/ui/inputs/TextInput.vue";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/vue/24/outline";
 import { RouterLink } from "vue-router";
+import {useAuthStore} from "@src/store/auth";
+import {IUserLogin, IUserSignUp} from "@src/types";
+import router from "@src/router";
 
 const showPassword = ref(false);
+
+const loginFormData = ref<IUserLogin>({
+  email: "",
+  password: ""
+});
+
+const authStore = useAuthStore();
+const login = async () => {
+  await authStore.login(loginFormData.value);
+  await router.push('/')
+}
+
+const updateLoginFormData = (data: IUserSignUp) => {
+  loginFormData.value = data
+}
+
 </script>
 
 <template>
@@ -30,11 +49,15 @@ const showPassword = ref(false);
       </div>
 
       <!--form-->
+      <form @submit.prevent="login">
       <div class="mb-6">
-        <TextInput label="Email" placeholder="Enter your email" class="mb-5" />
+        <TextInput label="Email" placeholder="Enter your email" :value="loginFormData.email"
+                   @input="updateLoginFormData({...loginFormData, email: $event.target.value})" class="mb-5" />
         <TextInput
           label="Password"
           placeholder="Enter your password"
+          :value="loginFormData.password"
+          @input="updateLoginFormData({...loginFormData, password: $event.target.value})"
           :type="showPassword ? 'text' : 'password'"
           class="pr-[40px]"
         >
@@ -60,9 +83,9 @@ const showPassword = ref(false);
 
       <!--local controls-->
       <div class="mb-6">
-        <Button class="w-full mb-4" link to="/">Sign in</Button>
+        <Button class="w-full mb-4" type="submit">Sign in</Button>
       </div>
-
+      </form>
       <!--divider-->
       <div class="mb-6 flex items-center">
         <span
