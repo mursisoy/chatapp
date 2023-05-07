@@ -1,7 +1,7 @@
 package es.unizar.mii.tmdad.chatapp.service
 
-import es.unizar.mii.tmdad.chatapp.entity.Role
-import es.unizar.mii.tmdad.chatapp.entity.UserEntity
+import es.unizar.mii.tmdad.chatapp.dao.Role
+import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm

@@ -39,7 +39,6 @@ class JwtAuthenticationFilter(
                     null,
                     userDetails.authorities
                 )
-
                 authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authToken
             }

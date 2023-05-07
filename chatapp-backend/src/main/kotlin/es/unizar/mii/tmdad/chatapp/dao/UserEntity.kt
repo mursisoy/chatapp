@@ -1,4 +1,4 @@
-package es.unizar.mii.tmdad.chatapp.entity
+package es.unizar.mii.tmdad.chatapp.dao
 
 import jakarta.persistence.*
 import org.springframework.security.core.GrantedAuthority
@@ -15,6 +15,12 @@ class UserEntity(
     @Column(name="username",unique = true)
     @JvmField
     val username: String = "",
+
+    @Column
+    private val name: String = "",
+
+    @Column
+    private val lastname: String = "",
 
     @Column
     private val password: String = "",

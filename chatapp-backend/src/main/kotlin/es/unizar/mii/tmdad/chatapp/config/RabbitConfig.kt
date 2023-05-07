@@ -17,15 +17,17 @@ class RabbitConfig {
         //factory.setUsername(userName) -> guest
         //factory.setPassword(password) -> guest
         //factory.setVirtualHost(virtualHost) -> /
+        factory.username = "guest"
+        factory.password = "guest"
         factory.host = "rabbitmq" //-> localhost
         //factory.setPort(portNumber) -> 5672
-
+        factory.isAutomaticRecoveryEnabled = true
         val conn: Connection = factory.newConnection()
 
         val channel =conn.createChannel()
 
         //crear exchange broadcast
-        channel.exchangeDeclare("broadcast", "fanout", true);
+        channel.exchangeDeclare("broadcast", "fanout", true)
 
         return channel
     }

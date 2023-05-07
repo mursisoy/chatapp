@@ -1,4 +1,4 @@
-package es.unizar.mii.tmdad.chatapp.entity
+package es.unizar.mii.tmdad.chatapp.dao
 
 import org.springframework.security.core.GrantedAuthority
 

@@ -9,8 +9,14 @@ import org.jetbrains.annotations.NotNull
 data class RegisterRequest(
     @NotNull
     @Size(min = 1)
-    var username: String,
-    @ValidPassword
+    var email: String,
+    @Size(min = 1)
+    var name: String,
+    @Size(min = 1)
+    var lastname: String,
+//    @ValidPassword
+    @NotNull
+    @Size(min = 1)
     var password: String,
     @NotNull
     @Size(min = 1)
