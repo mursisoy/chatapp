@@ -39,7 +39,7 @@ const changeActiveSection = (event: {
 };
 
 const authStore = useAuthStore()
-const login = async () => {
+const signUp = async () => {
   await authStore.register(userSignupFormData.value);
   await router.push('/')
 }
@@ -75,7 +75,7 @@ const updateModelValue = (data: IUserSignUp) => {
           Sign in to start using messaging!
         </Typography>
       </div>
-      <form @submit.prevent="login">
+      <form @submit.prevent="signUp">
       <!--form section-->
       <SlideTransition :animation="animation">
         <component
