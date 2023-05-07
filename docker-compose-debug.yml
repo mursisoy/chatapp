@@ -1,11 +1,19 @@
 version: '3.0'
 
+volumes:
+  db-data:
+  rabbitmq-data:
+
 services:
   db:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_DB: chatapp
+      POSTGRES_USER: chatapp
+      POSTGRES_PASSWORD: chatapp
+#    volumes:
+#      - db-data:/var/lib/postgresql/data
 
   adminer:
     image: adminer
@@ -33,12 +41,17 @@ services:
 
   backend:
     image: chatapp-backend:0.0.1-SNAPSHOT-debug
+    depends_on:
+      - db
+      - rabbitmq
     environment:
       BPL_DEBUG_ENABLED: true
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+#    volumes:
+#      - rabbitmq-data:/var/lib/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
