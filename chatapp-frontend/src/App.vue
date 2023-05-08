@@ -35,23 +35,23 @@ store.$subscribe((_mutation, state) => {
 });
 
 // here we load the data from the server.
-onMounted(async () => {
-  store.status = "loading";
-
-  // fake server call
-  setTimeout(() => {
-    store.delayLoading = false;
-  });
-  const request = await fetchData();
-
-  store.$patch({
-    status: "success",
-    user: request.data.user,
-    conversations: request.data.conversations,
-    notifications: request.data.notifications,
-    archivedConversations: request.data.archivedConversations,
-  });
-});
+// onMounted(async () => {
+//   store.status = "loading";
+//
+//   // fake server call
+//   setTimeout(() => {
+//     store.delayLoading = false;
+//   });
+//   const request = await fetchData();
+//
+//   store.$patch({
+//     status: "success",
+//     user: request.data.user,
+//     conversations: request.data.conversations,
+//     notifications: request.data.notifications,
+//     archivedConversations: request.data.archivedConversations,
+//   });
+// });
 
 // the app height
 const height = ref(`${window.innerHeight}px`);
