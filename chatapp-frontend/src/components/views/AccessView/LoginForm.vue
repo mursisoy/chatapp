@@ -24,7 +24,7 @@ const login = async () => {
   await router.push('/')
 }
 
-const updateLoginFormData = (data: IUserSignUp) => {
+const updateLoginFormData = (data: IUserLogin) => {
   loginFormData.value = data
 }
 
