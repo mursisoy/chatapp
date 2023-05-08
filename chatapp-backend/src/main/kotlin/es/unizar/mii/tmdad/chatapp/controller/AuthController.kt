@@ -9,7 +9,7 @@ import es.unizar.mii.tmdad.chatapp.dto.RegisterRequest
 import es.unizar.mii.tmdad.chatapp.dao.Role
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.exception.UserNotFoundException
-import es.unizar.mii.tmdad.chatapp.service.AuthenticationService
+import es.unizar.mii.tmdad.chatapp.service.UserService
 import es.unizar.mii.tmdad.chatapp.service.JwtService
 import io.jsonwebtoken.Claims
 import jakarta.validation.Valid
@@ -21,7 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController(
-    private val authenticationService: AuthenticationService,
+    private val userService: UserService,
     private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService
@@ -43,7 +43,7 @@ class AuthController(
             role = Role.USER
         )
 
-        val registeredUser = authenticationService.register(user)
+        val registeredUser = userService.register(user)
 
         val jwt = jwtService.generateToken(registeredUser)
 
@@ -59,7 +59,7 @@ class AuthController(
     fun login(
         @RequestBody authenticationRequest: AuthenticationRequest
     ): ResponseEntity<AuthenticationResponse> {
-        val user = authenticationService.loadUserByUsername(authenticationRequest.email)
+        val user = userService.loadUserByUsername(authenticationRequest.email)
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(
                 user,
