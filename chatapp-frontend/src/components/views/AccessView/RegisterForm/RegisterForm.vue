@@ -7,7 +7,7 @@ import Typography from "@src/components/ui/data-display/Typography.vue";
 import PasswordSection from "@src/components/views/AccessView/RegisterForm/PasswordSection.vue";
 import PersonalSection from "@src/components/views/AccessView/RegisterForm/PersonalSection.vue";
 import {IUserSignUp} from "@src/types";
-import {useAuthStore} from "@src/store/auth";
+import {useUserStore} from "@src/store/user";
 import router from "@src/router";
 
 defineEmits(["activeSectionChange"]);
@@ -38,7 +38,7 @@ const changeActiveSection = (event: {
   activeSectionName.value = event.sectionName;
 };
 
-const authStore = useAuthStore()
+const authStore = useUserStore()
 const signUp = async () => {
   await authStore.register(userSignupFormData.value);
   await router.push('/')

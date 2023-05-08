@@ -7,7 +7,7 @@ import IconButton from "@src/components/ui/inputs/IconButton.vue";
 import TextInput from "@src/components/ui/inputs/TextInput.vue";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/vue/24/outline";
 import { RouterLink } from "vue-router";
-import {useAuthStore} from "@src/store/auth";
+import {useUserStore} from "@src/store/user";
 import {IUserLogin, IUserSignUp} from "@src/types";
 import router from "@src/router";
 
@@ -18,7 +18,7 @@ const loginFormData = ref<IUserLogin>({
   password: ""
 });
 
-const authStore = useAuthStore();
+const authStore = useUserStore();
 const login = async () => {
   await authStore.login(loginFormData.value);
   await router.push('/')

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import useStore from "@src/store/store";
-import {useAuthStore} from "@src/store/auth";
+import {useUserStore} from "@src/store/user";
 
 import {
   ArrowLeftOnRectangleIcon,
@@ -20,7 +20,7 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
-const authStore = useAuthStore();
+const authStore = useUserStore();
 
 const logout = async () => {
   await authStore.logout();
