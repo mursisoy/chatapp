@@ -1,5 +1,5 @@
 export interface IUser {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -10,7 +10,7 @@ export interface IUser {
 }
 
 export interface IContact {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   avatar: string;
@@ -61,7 +61,7 @@ export interface IConversation {
   type: string;
   name?: string;
   avatar?: string;
-  admins?: number[];
+  admins?: string[];
   contacts: IContact[];
   messages: IMessage[];
   pinnedMessage?: IMessage;
