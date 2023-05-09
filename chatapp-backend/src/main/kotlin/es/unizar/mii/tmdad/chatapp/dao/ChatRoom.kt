@@ -4,6 +4,6 @@ import java.util.UUID
 
 class ChatRoom (
     val id: UUID = UUID.randomUUID(),
-    val owner: UserEntity,
-    val contacts: Set<UserEntity>
+    val owner: UserEntity? = null,
+    val contacts: Set<String>
 )
