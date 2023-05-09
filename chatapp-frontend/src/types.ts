@@ -45,10 +45,10 @@ export interface IRecording {
 }
 
 export interface IMessage {
-  id: number;
+  id: string;
   type?: string;
   content?: string | IRecording;
-  date: string;
+  date: number;
   sender: IContact;
   replyTo?: number;
   previewData?: IPreviewData;
@@ -57,7 +57,7 @@ export interface IMessage {
 }
 
 export interface IConversation {
-  id: number;
+  id: string;
   type: string;
   name?: string;
   avatar?: string;
@@ -121,4 +121,13 @@ export interface IUserSignUp {
 export interface IUserLogin {
   email: string;
   password: string;
+}
+
+export interface IEnvelope {
+  id: string,
+  from: string,
+  to: string,
+  type?: string;
+  content?: string | IRecording;
+  date: number;
 }

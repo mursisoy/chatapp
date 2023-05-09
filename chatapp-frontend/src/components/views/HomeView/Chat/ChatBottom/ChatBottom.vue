@@ -4,7 +4,8 @@ import type { IConversation } from "@src/types";
 
 import useStore from "@src/store/store";
 import { ref, inject, onMounted } from "vue";
-import { getConversationIndex } from "@src/utils";
+import { getConversationIndex, getOddContact } from "@src/utils";
+import {v4 as uuidv4} from "uuid";
 
 import {
   CheckIcon,
@@ -22,8 +23,10 @@ import ScaleTransition from "@src/components/ui/transitions/ScaleTransition.vue"
 import ReplyMessage from "@src/components/views/HomeView/Chat/ChatBottom/ReplyMessage.vue";
 import EmojiPicker from "@src/components/ui/inputs/EmojiPicker/EmojiPicker.vue";
 import Textarea from "@src/components/ui/inputs/Textarea.vue";
+import useSocketStore from "@src/store/socket";
 
 const store = useStore();
+const socketStore = useSocketStore();
 
 const activeConversation = <IConversation>inject("activeConversation");
 
@@ -71,6 +74,20 @@ const handleSetDraft = () => {
     store.conversations[index].draftMessage = value.value;
   }
 };
+
+function sendMessage() {
+  const contact = getOddContact(activeConversation)
+  if (store.user &&  contact) {
+    socketStore.sendMessage({
+      id: uuidv4(),
+      date: new Date().getTime(),
+      from: store.user?.id,
+      to: contact.id,
+      content: value.value
+    })
+    value.value = ""
+  }
+}
 
 onMounted(() => {
   value.value = activeConversation.draftMessage;
@@ -129,6 +146,7 @@ onMounted(() => {
             rows="1"
             placeholder="Write your message here"
             aria-label="Write your message here"
+            v-on:keyup.enter="sendMessage"
           />
 
           <!--emojis-->
@@ -215,6 +233,7 @@ onMounted(() => {
           variant="ghost"
           title="send message"
           aria-label="send message"
+          @click="sendMessage"
         >
           <PaperAirplaneIcon class="w-[17px] h-[17px] text-white" />
         </IconButton>

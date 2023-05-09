@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import {Client, IMessage} from "@stomp/stompjs";
 
 import useStore from "@src/store/store";
-
+import {useUserStore} from "@src/store/user";
+import useSocketStore from "@src/store/socket";
 import Chat from "@src/components/views/HomeView/Chat/Chat.vue";
 import Navigation from "@src/components/views/HomeView/Navigation/Navigation.vue";
 import Sidebar from "@src/components/views/HomeView/Sidebar/Sidebar.vue";
@@ -11,6 +13,8 @@ import Loading3 from "@src/components/states/loading-states/Loading3.vue";
 import FadeTransition from "@src/components/ui/transitions/FadeTransition.vue";
 
 const store = useStore();
+const authStore = useUserStore();
+const socketStore = useSocketStore()
 
 // the active chat component or loading component.
 const activeChatComponent = computed(() => {
@@ -22,6 +26,26 @@ const activeChatComponent = computed(() => {
     return NoChatSelected;
   }
 });
+
+function onMessageReceived(message: IMessage) {
+  console.log(message)
+}
+
+onMounted(() => {
+  store.status = "loading";
+  setTimeout(() => {
+    store.delayLoading = false;
+  });
+
+  store.$patch({
+    status: "success",
+    user: authStore.user,
+    // conversations: request.data.conversations,
+    // notifications: request.data.notifications,
+    // archivedConversations: request.data.archivedConversations,
+  });
+  socketStore.init(onMessageReceived);
+})
 </script>
 
 <template>

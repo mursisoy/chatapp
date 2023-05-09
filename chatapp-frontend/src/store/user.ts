@@ -5,8 +5,8 @@ import jwt_decode from "jwt-decode";
 import {IContact, IUser, IUserLogin, IUserSignUp} from "@src/types";
 
 interface  State {
-    user: IUser | undefined,
-    token: TokenResponse | undefined
+    user: IUser,
+    token: TokenResponse
 }
 interface TokenResponse {
     accessToken: string,
@@ -21,8 +21,8 @@ interface CsrfTokenResponse {
 }
 export const useUserStore = defineStore("auth", {
     state: (): State => ({
-        user: localStorage.getItem('user')? JSON.parse( localStorage.getItem('user') || "{}") : undefined,
-        token: localStorage.getItem('token')? JSON.parse( localStorage.getItem('token') || "{}") : undefined,
+        user: JSON.parse( localStorage.getItem('user') || "{}"),
+        token: JSON.parse( localStorage.getItem('token') || "{}"),
     }),
     actions: {
         async updateStore(token: TokenResponse) {
