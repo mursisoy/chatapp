@@ -21,7 +21,7 @@ class JwtService {
     fun extractUser(token: String): UserDetails? {
         val claims: Claims = extractAllClaims(token)
         return UserEntity(
-            id = UUID.fromString(claims["user_id"].toString()),
+            id = UUID.fromString(claims["id"].toString()),
             username = extractClaim(token, Claims::getSubject),
             role = enumValueOf<Role>(claims["role"].toString())
         )
@@ -48,7 +48,7 @@ class JwtService {
     fun generateToken(user: UserEntity): String {
         return generateToken(
             hashMapOf(
-                "user_id" to user.id,
+                "id" to user.id,
                 "role" to user.role
             ), user)
     }
