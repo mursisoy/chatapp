@@ -11,8 +11,11 @@ import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.messaging.support.MessageHeaderAccessor
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
+import kotlin.math.log
 
 
 @Component
@@ -22,8 +25,7 @@ class AuthenticationChannelInterceptor(private val jwtService: JwtService) : Cha
         val headerAccessor = MessageHeaderAccessor.getAccessor(message) as StompHeaderAccessor
         SimpMessageHeaderAccessor.getSessionAttributes(message.headers)
         if (headerAccessor.messageType?.equals(SimpMessageType.CONNECT) == true) {
-            val authHeader = headerAccessor.getNativeHeader("Authorization")?.get(0)
-            logger.info(authHeader)
+            val authHeader = headerAccessor.getNativeHeader("authorization")?.get(0)
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return message
             }
@@ -41,6 +43,7 @@ class AuthenticationChannelInterceptor(private val jwtService: JwtService) : Cha
                 }
             }
         }
+        logger.info(headerAccessor.user.toString())
         return MessageBuilder.createMessage(message.payload, headerAccessor.messageHeaders)
 
     }
