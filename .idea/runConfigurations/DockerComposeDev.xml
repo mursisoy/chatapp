@@ -11,8 +11,6 @@
     </deployment>
     <method v="2">
       <option name="Gradle.BeforeRunTask" enabled="true" tasks="bootDebugBuildImage" externalProjectPath="$PROJECT_DIR$/chatapp-backend" vmOptions="" scriptParameters="" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="npmInstall" externalProjectPath="$PROJECT_DIR$/chatapp-frontend" vmOptions="" scriptParameters="" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="npmBuild" externalProjectPath="$PROJECT_DIR$/chatapp-frontend" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>

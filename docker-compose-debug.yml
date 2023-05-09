@@ -1,9 +1,5 @@
 version: '3.0'
 
-volumes:
-  db-data:
-  rabbitmq-data:
-
 services:
   db:
     image: postgres
