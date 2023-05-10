@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 class MinioService (private val minioClient: MinioClient) {
 
-    val bucketName ="00000qweqwe"
+    private val bucketName ="00000qweqwe"
     fun uploadFile(files: MultipartFile) {
         minioClient.uploadObject(
             UploadObjectArgs.builder()

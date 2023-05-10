@@ -62,7 +62,7 @@ class RabbitService (private val channel: Channel){
         //crear exchange con idSala
         channel.exchangeDeclare(idSala, "fanout", true);
         //el idSala sera igual a un numeor aleatorioa concatenado con : al id del
-        // usuario que creo la sala(admin) y con el tipo de sala
+        // usuario que creo la sala(admin) y con el tipo de sal
 
         //crear binding entre el exchange de la sala y el de los usuarios pertenecientes a esta
         for (user in userOfGroup) {

@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean
 
 class MinioConfig {
 
+    //credenciales a cambiar
     private val accessKey="Q3AM3UQ867SPQQA43P2F"
 
     private val accessSecret="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
