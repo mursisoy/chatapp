@@ -1,4 +1,4 @@
-package es.unizar.mii.tmdad.chatapp.dto
+package es.unizar.mii.tmdad.chatapp.dao
 
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity

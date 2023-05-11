@@ -76,17 +76,18 @@ const handleSetDraft = () => {
 };
 
 function sendMessage() {
-  const contact = getOddContact(activeConversation)
-  if (store.user &&  contact) {
-    socketStore.sendMessage({
-      id: uuidv4(),
-      date: new Date().getTime(),
-      from: store.user?.email,
-      to: contact.email,
-      content: value.value
-    })
-    value.value = ""
-  }
+
+  // const contact = getOddContact(activeConversation)
+  //
+  //   socketStore.sendMessage({
+  //     id: uuidv4(),
+  //     date: new Date().getTime(),
+  //     from: store.user?.email,
+  //     to: contact.email,
+  //     content: value.value
+  //   })
+  //   value.value = ""
+  // }
 }
 
 onMounted(() => {

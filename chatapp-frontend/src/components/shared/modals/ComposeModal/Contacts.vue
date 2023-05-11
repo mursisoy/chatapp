@@ -22,37 +22,39 @@ const socketStore = useSocketStore();
 function contactSelected(contact: IContact){
   // console.log(contact)
   // socketStore.newCoupleConversation(contact)
-  const r1 = uuidParse(contact.id)
-  const r2 = uuidParse(userStore.user!.id)
-  const r3 = r1.map((v, i, a) => {
-    if (i == 6)
-      return ((v^r2[i]) & 0x0F) | 0x40
-    if (i == 8)
-      return ((v^r2[i]) & 0x3F) | 0x80
-    return (v^r2[i])
-  })
-  console.log(r3)
-  const conversationId = uuidStringify(r3)
-  const existingConversation = store.conversations.filter((v,i,a)=> v.id == conversationId).at(0)
-  console.log(conversationId)
-  console.log(existingConversation)
-  if ( !existingConversation ) {
-    const conversation: IConversation = {
-      id: uuidStringify(r3),
-      type: "couple",
-      contacts: [
-        contact,
-        getUserAsContact(userStore.user!)
-      ],
-      messages: [],
-      draftMessage: ""
-    }
-    console.log(conversation)
-    store.conversations.push(conversation)
-  }
-  store.activeConversationId = conversationId
-  store.activeSidebarComponent = "messages"
-  emit('goToConversation')
+  // const r1 = uuidParse(contact.id)
+  // const r2 = uuidParse(userStore.user!.id)
+  // const r3 = r1.map((v, i, a) => {
+  //   if (i == 6)
+  //     return ((v^r2[i]) & 0x0F) | 0x40
+  //   if (i == 8)
+  //     return ((v^r2[i]) & 0x3F) | 0x80
+  //   return (v^r2[i])
+  // })
+  // console.log(r3)
+  // const conversationId = uuidStringify(r3)
+  // const existingConversation = store.conversations.filter((v,i,a)=> v.id == conversationId).at(0)
+  // console.log(conversationId)
+  // console.log(existingConversation)
+  // if ( !existingConversation ) {
+  //   const conversation: IConversation = {
+  //     id: uuidStringify(r3),
+  //     type: "couple",
+  //     contacts: [
+  //       contact,
+  //       getUserAsContact(userStore.user!)
+  //     ],
+  //     messages: [],
+  //     draftMessage: ""
+  //   }
+  //   console.log(conversation)
+
+
+  // store.conversations.push(conversation)
+  // }
+  // store.activeConversationId = conversationId
+  // store.activeSidebarComponent = "messages"
+  // emit('goToConversation')
 }
 </script>
 
