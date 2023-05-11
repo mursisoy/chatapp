@@ -28,6 +28,7 @@ export const useUserStore = defineStore("auth", {
         async updateStore(token: TokenResponse) {
             this.token = token
             this.user = jwt_decode(<string>this.token?.accessToken)
+            this.user.email = this.user.sub
             this.user!.contacts = await this.getContacts()
             localStorage.setItem('token', JSON.stringify(this.token))
             localStorage.setItem('user', JSON.stringify(this.user))

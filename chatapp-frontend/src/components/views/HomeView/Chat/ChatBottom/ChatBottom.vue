@@ -81,8 +81,8 @@ function sendMessage() {
     socketStore.sendMessage({
       id: uuidv4(),
       date: new Date().getTime(),
-      from: store.user?.id,
-      to: contact.id,
+      from: store.user?.email,
+      to: contact.email,
       content: value.value
     })
     value.value = ""
