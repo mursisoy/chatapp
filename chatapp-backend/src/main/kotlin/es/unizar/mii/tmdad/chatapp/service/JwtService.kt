@@ -21,8 +21,8 @@ class JwtService {
     fun extractUser(token: String): UserDetails? {
         val claims: Claims = extractAllClaims(token)
         return UserEntity(
-            id = UUID.fromString(claims["id"].toString()),
-            username = extractClaim(token, Claims::getSubject),
+            email = claims["email"].toString(),
+            username = UUID.fromString(extractClaim(token, Claims::getSubject)),
             role = enumValueOf<Role>(claims["role"].toString())
         )
     }
@@ -33,8 +33,8 @@ class JwtService {
     }
 
     fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
-        val userEmail = extractSubject(token)
-        return userEmail == userDetails.username && !isTokenExpired(token)
+        val username = extractSubject(token)
+        return username == userDetails.username && !isTokenExpired(token)
     }
 
     private fun isTokenExpired(token: String): Boolean {
@@ -48,8 +48,11 @@ class JwtService {
     fun generateToken(user: UserEntity): String {
         return generateToken(
             hashMapOf(
-                "id" to user.id,
-                "role" to user.role
+                "username" to user.username,
+                "email" to user.email,
+                "role" to user.role,
+                "firstName" to user.firstName,
+                "lastName" to user.lastName
             ), user)
     }
 
@@ -60,7 +63,7 @@ class JwtService {
         return Jwts
             .builder()
             .setClaims(extraClaims)
-            .setSubject(user.username)
+            .setSubject(user.username.toString())
             .setIssuedAt(Date(System.currentTimeMillis()))
             .setExpiration(Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)

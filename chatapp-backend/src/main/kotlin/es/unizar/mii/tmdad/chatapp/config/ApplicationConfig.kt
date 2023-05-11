@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import es.unizar.mii.tmdad.chatapp.repository.UserRepository
 import es.unizar.mii.tmdad.chatapp.service.UserService
 import org.springframework.boot.ApplicationRunner
+import java.util.*
 
 @Configuration
 class ApplicationConfig(
@@ -23,7 +24,7 @@ class ApplicationConfig(
     @Bean
     fun userDetailsService(): UserDetailsService {
         return UserDetailsService { username ->
-            userRepository.findByUsername(username) ?: throw UsernameNotFoundException("User not found")
+            userRepository.findByUsername(UUID.fromString(username)) ?: throw UsernameNotFoundException("User not found")
         }
     }
 
@@ -50,7 +51,7 @@ class ApplicationConfig(
     fun databaseInitializer(userService: UserService) = ApplicationRunner {
 
         userService.register(UserEntity(
-            username = "admin@chatapp.local",
+            email = "admin@chatapp.local",
             password = passwordEncoder().encode("admin"),
             firstName = "Foo",
             lastName = "Bar",
@@ -60,7 +61,7 @@ class ApplicationConfig(
         for (i in 1..20) {
             userService.register(
                 UserEntity(
-                    username = "user${i}@chatapp.local",
+                    email = "user${i}@chatapp.local",
                     password = passwordEncoder().encode("user${i}"),
                     firstName = "User",
                     lastName = i.toString().padStart(2,'0'),

@@ -14,6 +14,7 @@ import es.unizar.mii.tmdad.chatapp.service.JwtService
 //import es.unizar.mii.tmdad.chatapp.service.RabbitService
 import io.jsonwebtoken.Claims
 import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -28,7 +29,6 @@ class AuthController(
     private val jwtService: JwtService,
     //private val rabbitService: RabbitService
 ) {
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException::class)
     fun handleNotFoundException(e: NoSuchElementException): ResponseEntity<Map<String, String?>> {
@@ -40,7 +40,7 @@ class AuthController(
         @Valid @RequestBody registerRequest: RegisterRequest
     ): ResponseEntity<AuthenticationResponse> {
         val user = UserEntity(
-            username = registerRequest.email,
+            email = registerRequest.email,
             password = passwordEncoder.encode(registerRequest.password),
             role = Role.USER
         )
@@ -63,7 +63,7 @@ class AuthController(
     fun login(
         @RequestBody authenticationRequest: AuthenticationRequest
     ): ResponseEntity<AuthenticationResponse> {
-        val user = userService.loadUserByUsername(authenticationRequest.email)
+        val user = userService.loadUserByEmail(authenticationRequest.email)
         val authentication: Authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(
                 user,
@@ -79,7 +79,5 @@ class AuthController(
             accessToken = jwt,
             expiresAt = jwtService.extractClaim(jwt, Claims::getExpiration).time,
             type="Bearer"))
-
-
     }
 }

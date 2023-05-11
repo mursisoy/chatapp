@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.exception.UserNotFoundException
 import es.unizar.mii.tmdad.chatapp.repository.UserRepository
+import java.util.UUID
 
 
 @Service
@@ -17,7 +18,7 @@ class AuthenticationService(
         return newUser
     }
 
-    fun loadUserByUsername(username: String): UserEntity{
+    fun loadUserByUsername(username: UUID): UserEntity{
         return userRepository.findByUsername(username) ?: throw UserNotFoundException("User nor found")
     }
 

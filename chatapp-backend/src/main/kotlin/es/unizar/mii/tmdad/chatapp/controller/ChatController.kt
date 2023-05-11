@@ -30,12 +30,11 @@ class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOpera
     fun getContacts(principal: Principal, authentication: Authentication): ResponseEntity<ContactListResponse> {
         val loggedInUser = authentication.principal as UserEntity
         logger.info("LOGGEDIN USER: ${principal.name}")
-        logger.info("LOGGEDIN USER: ${loggedInUser.id}")
         logger.info("LOGGEDIN USER: ${loggedInUser.username}")
         val contactList = userService.getAllUsers().map {
             ContactInfo(
-                id = it.id,
-                email = it.username,
+                username = it.getUsername(),
+                email = it.email,
                 firstName = it.firstName,
                 lastName = it.lastName
             )
@@ -60,13 +59,6 @@ class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOpera
 
     @MessageMapping("/message")
     fun message(@Payload message: ChatMessage, authentication: Authentication,  @Header("simpSessionId") sessionId: String) {
-        val loggedInUser = authentication.principal as UserEntity
-        logger.info("LOGGEDIN USER: $loggedInUser")
-//        val chatRoom = ChatRoom(
-//            id = UUID.randomUUID(),
-//            contacts = message.contacts.toSet())
-//        chatrooms.add(chatRoom)
-        // TODO CREATE EXCHANGE BINDING
         simpMessageSendingOperations.convertAndSendToUser(message.to, "/queue/messages", message)
     }
 
