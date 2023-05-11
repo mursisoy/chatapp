@@ -4,8 +4,8 @@ export interface IUser {
   lastName: string;
   email: string;
   avatar: string;
-  token: string;
   lastSeen: Date;
+  role: string,
   contacts: IContact[];
 }
 
@@ -50,7 +50,7 @@ export interface IMessage {
   content?: string | IRecording;
   date: number;
   sender: IContact;
-  replyTo?: number;
+  replyTo?: string;
   previewData?: IPreviewData;
   attachments?: IAttachment[];
   state: string;

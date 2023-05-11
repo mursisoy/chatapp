@@ -9,9 +9,9 @@ import Message from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Mess
 import TimelineDivider from "@src/components/views/HomeView/Chat/ChatMiddle/TimelineDivider.vue";
 
 const props = defineProps<{
-  handleSelectMessage: (messageId: number) => void;
-  handleDeselectMessage: (messageId: number) => void;
-  selectedMessages: number[];
+  handleSelectMessage: (messageId: string) => void;
+  handleDeselectMessage: (messageId: string) => void;
+  selectedMessages: string[];
 }>();
 
 const store = useStore();

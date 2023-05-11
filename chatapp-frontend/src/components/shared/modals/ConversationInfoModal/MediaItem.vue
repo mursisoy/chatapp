@@ -10,7 +10,7 @@ import Typography from "@src/components/ui/data-display/Typography.vue";
 
 const props = defineProps<{
   attachment: IAttachment;
-  date: string;
+  date: number;
 }>();
 </script>
 

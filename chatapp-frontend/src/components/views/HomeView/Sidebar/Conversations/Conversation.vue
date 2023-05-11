@@ -25,7 +25,7 @@ import DropdownLink from "@src/components/ui/navigation/Dropdown/DropdownLink.vu
 const props = defineProps<{
   conversation: IConversation;
   isActive?: boolean;
-  handleConversationChange?: (conversationId: number) => void;
+  handleConversationChange?: (conversationId: string) => void;
 }>();
 
 const store = useStore();
@@ -180,7 +180,7 @@ const handleRemoveUnread = () => {
               :class="{ 'text-indigo-400': props.conversation.unread }"
             >
               <span :class="{ 'text-indigo-400': props.conversation.unread }">
-                {{ lastshorten(lastMessage) }}
+                {{ shorten(lastMessage) }}
               </span>
             </Typography>
           </div>

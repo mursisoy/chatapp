@@ -51,7 +51,7 @@ watch([keyword, openArchive], () => {
 });
 
 // (event) switch between the rendered conversations.
-const handleConversationChange = (conversationId: number) => {
+const handleConversationChange = (conversationId: string) => {
   store.activeConversationId = conversationId;
   store.conversationOpen = "open";
 };
@@ -128,7 +128,7 @@ onMounted(() => {
             <component
               :is="ConversationsList"
               :filtered-conversations="filteredConversations"
-              :active-id="(store.activeConversationId as number)"
+              :active-id="(store.activeConversationId as string)"
               :handle-conversation-change="handleConversationChange"
               :key="openArchive ? 'archive' : 'active'"
             />

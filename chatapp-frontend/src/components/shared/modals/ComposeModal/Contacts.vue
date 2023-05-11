@@ -42,7 +42,7 @@ function contactSelected(contact: IContact){
       type: "couple",
       contacts: [
         contact,
-        getUserAsContact(userStore.user)
+        getUserAsContact(userStore.user!)
       ],
       messages: [],
       draftMessage: ""

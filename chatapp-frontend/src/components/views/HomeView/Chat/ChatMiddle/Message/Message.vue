@@ -26,8 +26,8 @@ const props = defineProps<{
   self: boolean;
   divider?: boolean;
   selected?: boolean;
-  handleSelectMessage: (messageId: number) => void;
-  handleDeselectMessage: (messageId: number) => void;
+  handleSelectMessage: (messageId: string) => void;
+  handleDeselectMessage: (messageId: string) => void;
 }>();
 
 const activeConversation = <IConversation>inject("activeConversation");

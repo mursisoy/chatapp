@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import router from "@src/router";
 import {fetchWrapper} from "@src/helpers/fetchWrapper";
-import jwt_decode from "jwt-decode";
+import jwt_decode, {JwtPayload} from "jwt-decode";
 import {IContact, IUser, IUserLogin, IUserSignUp} from "@src/types";
 
 interface  State {
-    user: IUser,
-    token: TokenResponse
+    user: IUser | undefined,
+    token: TokenResponse | undefined
 }
 interface TokenResponse {
     accessToken: string,
@@ -19,16 +19,34 @@ interface CsrfTokenResponse {
     parameterName: string,
     headerName: string
 }
+
+interface IDecodedJwt extends JwtPayload{
+    username: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    role: string
+}
 export const useUserStore = defineStore("auth", {
     state: (): State => ({
-        user: JSON.parse( localStorage.getItem('user') || "{}"),
-        token: JSON.parse( localStorage.getItem('token') || "{}"),
+        user: localStorage.getItem('user') ? JSON.parse( localStorage.getItem('user') || "{}") : undefined,
+        token: localStorage.getItem('token') ? JSON.parse( localStorage.getItem('token') || "{}") : undefined,
     }),
     actions: {
         async updateStore(token: TokenResponse) {
             this.token = token
-            this.user = jwt_decode(<string>this.token?.accessToken)
-            this.user.email = this.user.sub
+            let decoded_jwt : IDecodedJwt= jwt_decode(<string>this.token?.accessToken)
+            console.log(decoded_jwt)
+            this.user = {
+                id: decoded_jwt.username,
+                firstName: decoded_jwt.firstName,
+                lastName: decoded_jwt.lastName,
+                email: decoded_jwt.email,
+                role: decoded_jwt.role,
+                avatar: "",
+                lastSeen: new Date(),
+                contacts: await this.getContacts()
+            }
             this.user!.contacts = await this.getContacts()
             localStorage.setItem('token', JSON.stringify(this.token))
             localStorage.setItem('user', JSON.stringify(this.user))

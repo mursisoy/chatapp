@@ -189,7 +189,7 @@ export const getCallName = (
 
 export const getMessageById = (
   conversation: IConversation,
-  messageId?: number
+  messageId?: string
 ) => {
   if (messageId) {
     return conversation.messages.find((message) => message.id === messageId);
