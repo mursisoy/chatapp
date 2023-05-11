@@ -5,6 +5,13 @@ logging:
     org:
       springframework:
         security: DEBUG
+        web: DEBUG
+        messaging: DEBUG
+    es:
+      unizar:
+        mii:
+          tmdad:
+            chatapp: DEBUG
 
 spring:
   jpa:

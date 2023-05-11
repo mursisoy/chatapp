@@ -5,7 +5,7 @@ import Conversation from "./Conversation.vue";
 const props = defineProps<{
   filteredConversations?: IConversation[];
   handleConversationChange: (conversationId: number) => void;
-  activeId?: number;
+  activeId?: string;
 }>();
 </script>
 

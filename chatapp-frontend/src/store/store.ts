@@ -3,6 +3,8 @@ import type { Ref } from "vue";
 import { computed, ref } from "vue";
 
 import defaults from "@src/store/defaults";
+import {useUserStore} from "@src/store/user";
+
 import type {
   IConversation,
   IContactGroup,
@@ -14,6 +16,8 @@ import type {
 } from "@src/types";
 
 const useStore = defineStore("chat", () => {
+
+  const authStore = useUserStore()
   // local storage
   const storage = JSON.parse(localStorage.getItem("chat") || "{}");
 
@@ -22,7 +26,7 @@ const useStore = defineStore("chat", () => {
 
   // app data refs
   // data refs
-  const user: Ref<IUser | undefined> = ref(defaults.user);
+  const user: Ref<IUser | undefined> = ref(authStore.user);
   const conversations: Ref<IConversation[]> = ref(defaults.conversations || []);
   const notifications: Ref<INotification[]> = ref(defaults.notifications || []);
   const archivedConversations: Ref<IConversation[]> = ref(
@@ -41,7 +45,7 @@ const useStore = defineStore("chat", () => {
     storage.activeSidebarComponent || "messages"
   );
   const delayLoading = ref(true);
-  const activeConversationId: Ref<number | undefined> = ref(6 || undefined);
+  const activeConversationId: Ref<string | undefined> = ref(undefined);
   const conversationOpen: Ref<string | undefined> = ref(
     storage.conversationOpen
   );

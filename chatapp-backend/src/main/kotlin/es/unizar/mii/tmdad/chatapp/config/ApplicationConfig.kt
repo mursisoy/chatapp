@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import es.unizar.mii.tmdad.chatapp.repository.UserRepository
-import es.unizar.mii.tmdad.chatapp.service.AuthenticationService
+import es.unizar.mii.tmdad.chatapp.service.UserService
 import org.springframework.boot.ApplicationRunner
 
 @Configuration
@@ -47,23 +47,23 @@ class ApplicationConfig(
     }
 
     @Bean
-    fun databaseInitializer(authenticationService: AuthenticationService) = ApplicationRunner {
+    fun databaseInitializer(userService: UserService) = ApplicationRunner {
 
-        authenticationService.register(UserEntity(
+        userService.register(UserEntity(
             username = "admin@chatapp.local",
             password = passwordEncoder().encode("admin"),
-            name = "Foo",
-            lastname = "Bar",
+            firstName = "Foo",
+            lastName = "Bar",
             role = Role.ADMIN
         ))
 
-        for (i in 1..99) {
-            authenticationService.register(
+        for (i in 1..20) {
+            userService.register(
                 UserEntity(
                     username = "user${i}@chatapp.local",
                     password = passwordEncoder().encode("user${i}"),
-                    name = "User",
-                    lastname = i.toString().padStart(2,'0'),
+                    firstName = "User",
+                    lastName = i.toString().padStart(2,'0'),
                     role = Role.USER
                 )
             )

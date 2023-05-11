@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.invocation.HandlerMethodArgumentRes
 import org.springframework.messaging.simp.SimpMessageType
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.authorization.SpringAuthorizationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,13 +20,15 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler
+import java.security.Principal
 
 
 @Configuration
 @EnableWebSocketMessageBroker
-class WebSocketConfig(private val authenticationChannelInterceptor: AuthenticationChannelInterceptor,
-                      private val applicationContext: ApplicationContext,
-                        ): WebSocketMessageBrokerConfigurer{
+class WebSocketConfig(
+    private val authenticationChannelInterceptor: AuthenticationChannelInterceptor,
+    private val applicationContext: ApplicationContext,
+): WebSocketMessageBrokerConfigurer{
 
     val securityContextHolderStrategy: SecurityContextHolderStrategy = SecurityContextHolder
         .getContextHolderStrategy()
@@ -39,7 +42,8 @@ class WebSocketConfig(private val authenticationChannelInterceptor: Authenticati
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        registry.enableSimpleBroker("/canuto")
+        registry.setApplicationDestinationPrefixes("/chat");
+        registry.enableSimpleBroker("queue");
     }
 
     override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver?>) {
@@ -60,11 +64,10 @@ class WebSocketConfig(private val authenticationChannelInterceptor: Authenticati
 
     fun messageAuthorizationManager(messages: MessageMatcherDelegatingAuthorizationManager.Builder): AuthorizationManager<Message<*>> {
         messages
-            .nullDestMatcher().permitAll()
-            .simpTypeMatchers(SimpMessageType.CONNECT,SimpMessageType.DISCONNECT, SimpMessageType.OTHER,SimpMessageType.HEARTBEAT,
-                SimpMessageType.UNSUBSCRIBE).permitAll()
-            .simpSubscribeDestMatchers("/canuto").authenticated()
-            .anyMessage().permitAll()
+//            .simpMessageDestMatchers("/topic","/queue").denyAll()
+//            .simpMessageDestMatchers("/cmd/**").authenticated()
+            .simpMessageDestMatchers("/chat/broadcast").hasRole("ADMIN")
+            .anyMessage().authenticated()
         return messages.build()
     }
 

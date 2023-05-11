@@ -2,11 +2,11 @@ import { defineStore } from "pinia";
 import router from "@src/router";
 import {fetchWrapper} from "@src/helpers/fetchWrapper";
 import jwt_decode from "jwt-decode";
-import {IUserLogin, IUserSignUp} from "@src/types";
+import {IContact, IUser, IUserLogin, IUserSignUp} from "@src/types";
 
 interface  State {
-    user: any | null,
-    token: TokenResponse | null
+    user: IUser,
+    token: TokenResponse
 }
 interface TokenResponse {
     accessToken: string,
@@ -19,54 +19,51 @@ interface CsrfTokenResponse {
     parameterName: string,
     headerName: string
 }
-export const useAuthStore = defineStore("auth", {
+export const useUserStore = defineStore("auth", {
     state: (): State => ({
-        user: localStorage.getItem('user')? JSON.parse( localStorage.getItem('user') || "{}") : null,
-        token: localStorage.getItem('token')? JSON.parse( localStorage.getItem('token') || "{}") : null,
+        user: JSON.parse( localStorage.getItem('user') || "{}"),
+        token: JSON.parse( localStorage.getItem('token') || "{}"),
     }),
-
-
     actions: {
+        async updateStore(token: TokenResponse) {
+            this.token = token
+            this.user = jwt_decode(<string>this.token?.accessToken)
+            this.user.email = this.user.sub
+            this.user!.contacts = await this.getContacts()
+            localStorage.setItem('token', JSON.stringify(this.token))
+            localStorage.setItem('user', JSON.stringify(this.user))
+        },
         async fetchUser() {
             const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/auth/user`);
-
             this.user = res;
-
-            // store user details and jwt in local storage to keep user logged in between page refreshes
             localStorage.setItem('user', JSON.stringify(this.user));
-
-            // redirect to previous url or default to home page
-            await router.push('/chat/all');
         },
         async register(user: IUserSignUp) {
             const res = await fetchWrapper.post(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/auth/register`,
                 user
             );
-
-            this.token = res
-            this.user = jwt_decode(<string>this.token?.accessToken)
-            localStorage.setItem('token', JSON.stringify(this.token))
-            localStorage.setItem('user', JSON.stringify(this.user))
+            await this.updateStore(res)
             // await this.fetchUser()
         },
         async login(user: IUserLogin) {
             const res = await fetchWrapper.post(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/auth/login`,
                 user);
-            this.token = res;
-            console.log(this.token?.accessToken)
-            this.user = jwt_decode(<string>this.token?.accessToken)
-            localStorage.setItem('token', JSON.stringify(this.token))
-            localStorage.setItem('user', JSON.stringify(this.user))
+            await this.updateStore(res)
         },
         async csrf(): Promise<CsrfTokenResponse>{
             const csrfToken = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/csrf`);
             return csrfToken
         },
         logout() {
-            this.user = null
-            this.token = null
+            this.user = undefined
+            this.token = undefined
             localStorage.removeItem('user')
             localStorage.removeItem('token')
+            localStorage.removeItem('chat')
+        },
+        async getContacts(): Promise<IContact[]> {
+            const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/contacts`)
+            return res.contacts
         }
     },
 });

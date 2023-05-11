@@ -145,7 +145,7 @@ const handleRemoveUnread = () => {
             <!--recording name-->
             <Typography
               v-else-if="
-                lastMessage.type === 'recording' && lastMessage.content
+                lastMessage?.type === 'recording' && lastMessage?.content
               "
               variant="body-2"
               class="flex justify-start items-center"
@@ -156,13 +156,13 @@ const handleRemoveUnread = () => {
               />
               <span :class="{ 'text-indigo-400': props.conversation.unread }">
                 Recording
-                {{ (lastMessage.content as IRecording).duration }}
+                {{ (lastMessage?.content as IRecording).duration }}
               </span>
             </Typography>
 
             <!--attachments title-->
             <Typography
-              v-else-if="hasAttachments(lastMessage)"
+                v-else-if="lastMessage && hasAttachments(lastMessage)"
               variant="body-2"
               class="flex justify-start items-center"
               :class="{ 'text-indigo-400': props.conversation.unread }"
@@ -174,13 +174,13 @@ const handleRemoveUnread = () => {
 
             <!--last message content -->
             <Typography
-              v-else
+              v-else-if="lastMessage"
               variant="body-2"
               class="flex justify-start items-center"
               :class="{ 'text-indigo-400': props.conversation.unread }"
             >
               <span :class="{ 'text-indigo-400': props.conversation.unread }">
-                {{ shorten(lastMessage) }}
+                {{ lastshorten(lastMessage) }}
               </span>
             </Typography>
           </div>

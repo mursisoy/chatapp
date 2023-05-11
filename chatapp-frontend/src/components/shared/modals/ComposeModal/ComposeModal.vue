@@ -9,6 +9,8 @@ import Button from "@src/components/ui/inputs/Button.vue";
 import FadeTransition from "@src/components/ui/transitions/FadeTransition.vue";
 import Modal from "@src/components/ui/utils/Modal.vue";
 
+defineEmits(["goToConversation"]);
+
 const props = defineProps<{
   open: boolean;
   closeModal: () => void;
@@ -33,6 +35,8 @@ const activeTab = computed(() => {
     return Group;
   }
 });
+
+
 </script>
 
 <template>
@@ -103,7 +107,7 @@ const activeTab = computed(() => {
 
         <!--ActiveTab-->
         <FadeTransition>
-          <component :is="activeTab" />
+          <component :is="activeTab" @go-to-conversation="props.closeModal"/>
         </FadeTransition>
       </div>
     </template>

@@ -3,7 +3,7 @@ import type {
   IContact,
   IConversation,
   IMessage,
-  IRecording,
+  IRecording, IUser,
 } from "@src/types";
 import useStore from "@src/store/store";
 
@@ -14,6 +14,17 @@ import useStore from "@src/store/store";
  */
 export const getFullName = (contact: IContact) => {
   return contact.firstName + " " + contact.lastName;
+};
+
+export const getUserAsContact = (user: IUser): IContact => {
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    avatar: "",
+    lastSeen: new Date()
+  }
 };
 
 /**
@@ -111,7 +122,7 @@ export const hasAttachments = (message: IMessage) => {
  * @returns A number indicating the index of the conversation.
  */
 export const getConversationIndex = (
-  conversationId: number
+  conversationId: string
 ): number | undefined => {
   let conversationIndex;
   const store = useStore();

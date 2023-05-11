@@ -17,13 +17,14 @@ class UserEntity(
     val username: String = "",
 
     @Column
-    private val name: String = "",
+    val firstName: String = "",
 
     @Column
-    private val lastname: String = "",
+    val lastName: String = "",
 
     @Column
-    private val password: String = "",
+    @JvmField
+    val password: String = "",
 
     @Enumerated(EnumType.STRING)
     val role: Role = Role.USER

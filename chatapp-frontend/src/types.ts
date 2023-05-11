@@ -1,5 +1,5 @@
 export interface IUser {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -10,7 +10,7 @@ export interface IUser {
 }
 
 export interface IContact {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   avatar: string;
@@ -45,10 +45,10 @@ export interface IRecording {
 }
 
 export interface IMessage {
-  id: number;
+  id: string;
   type?: string;
   content?: string | IRecording;
-  date: string;
+  date: number;
   sender: IContact;
   replyTo?: number;
   previewData?: IPreviewData;
@@ -57,11 +57,11 @@ export interface IMessage {
 }
 
 export interface IConversation {
-  id: number;
+  id: string;
   type: string;
   name?: string;
   avatar?: string;
-  admins?: number[];
+  admins?: string[];
   contacts: IContact[];
   messages: IMessage[];
   pinnedMessage?: IMessage;
@@ -121,4 +121,13 @@ export interface IUserSignUp {
 export interface IUserLogin {
   email: string;
   password: string;
+}
+
+export interface IEnvelope {
+  id: string,
+  from: string,
+  to: string,
+  type?: string;
+  content?: string | IRecording;
+  date: number;
 }
