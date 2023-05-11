@@ -11,7 +11,7 @@ import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.exception.UserNotFoundException
 import es.unizar.mii.tmdad.chatapp.service.UserService
 import es.unizar.mii.tmdad.chatapp.service.JwtService
-//import es.unizar.mii.tmdad.chatapp.service.RabbitService
+import es.unizar.mii.tmdad.chatapp.service.RabbitService
 import io.jsonwebtoken.Claims
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
@@ -27,7 +27,7 @@ class AuthController(
     private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
-    //private val rabbitService: RabbitService
+    private val rabbitService: RabbitService
 ) {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException::class)
@@ -47,7 +47,7 @@ class AuthController(
 
         val registeredUser = userService.register(user)
 
-       // rabbitService.registRabbit(user.username)
+        rabbitService.registRabbit(user.email)
 
         val jwt = jwtService.generateToken(registeredUser)
 
@@ -73,7 +73,7 @@ class AuthController(
 
         val jwt = jwtService.generateToken(authentication.principal as UserEntity)
 
-        //rabbitService.activeConsumer(user.username)
+        rabbitService.activeConsumer(user.username)
 
         return ResponseEntity.ok(AuthenticationResponse(
             accessToken = jwt,
