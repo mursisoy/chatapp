@@ -8,8 +8,11 @@ import org.springframework.stereotype.Service
 import java.io.IOException
 import java.util.Vector
 
+import com.rabbitmq.http.client.Client;
+
 @Service
-class RabbitService (private val channel: Channel){
+class RabbitService (private val channel: Channel,
+    private val cliente: Client){
 
     fun registRabbit(username: String ){
         val exchangeName=username+"Exchange"
@@ -59,10 +62,19 @@ class RabbitService (private val channel: Channel){
     }
 
     fun createChat(idSala: String, userOfGroup: Vector<String>){
+        //argumentos asociados al exchange de sala
+        val args=mutableMapOf<String, Any>()
+        if(userOfGroup.size==2){
+            args["tipo"]="individual"
+        }
+        else{
+            args["tipo"]="grupo"
+        }
+        args["admin"]=userOfGroup[0]
+
         //crear exchange con idSala
-        channel.exchangeDeclare(idSala, "fanout", true);
-        //el idSala sera igual a un numeor aleatorioa concatenado con : al id del
-        // usuario que creo la sala(admin) y con el tipo de sal
+        channel.exchangeDeclare(idSala, "fanout", true, false, args);
+        //durable para que sobreviva reinicios y no autodelete para que no se borre si no se usa
 
         //crear binding entre el exchange de la sala y el de los usuarios pertenecientes a esta
         for (user in userOfGroup) {
@@ -71,8 +83,12 @@ class RabbitService (private val channel: Channel){
     }
 
     fun updateChat(origin: String, idSala: String, action:String, usersAffected: Vector<String>){
-        if (origin == idSala.split(":")[1]) {
-            if (idSala.split(":")[2] == "grupo") {
+        //obtención de los argumentos del exchange
+        val exchange= cliente.getExchange("/", idSala)
+        val exchArgs=exchange.arguments
+
+        if (origin == exchArgs["admin"]) {
+            if (exchArgs["tipo"] == "grupo") {
                 if (action == "delete") {
                     for (user in usersAffected) {
                         //unbindings
@@ -91,9 +107,12 @@ class RabbitService (private val channel: Channel){
 
 
     fun deleteChat(origin: String, idSala: String){
+        //obtenecion de los argumentos del exchange de sala
+        val exchange= cliente.getExchange("/", idSala)
+        val exchArgs=exchange.arguments
         //borrar exchange de la sala si eres el propietario
-        if (idSala.split(":")[2] == "grupo") {
-            if (origin == idSala.split(":")[1]) {
+        if (exchArgs["tipo"] == "grupo") {
+            if (origin ==  exchArgs["admin"]) {
                 //delete biding
                 channel.exchangeDelete(idSala)
             }

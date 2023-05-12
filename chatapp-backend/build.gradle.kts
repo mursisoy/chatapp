@@ -40,6 +40,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.rabbitmq:http-client:5.0.0")
 
     implementation("com.jlefebure:spring-boot-starter-minio:1.10")
     implementation("io.minio:minio:8.5.2")

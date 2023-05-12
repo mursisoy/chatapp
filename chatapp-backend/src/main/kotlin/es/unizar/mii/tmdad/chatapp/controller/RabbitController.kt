@@ -18,7 +18,7 @@ class RabbitController(private val rabbitService: RabbitService) {
 
     @PostMapping("/newChat")
     fun createNewChat(@RequestBody infoChat: NewChatRequest) {
-        rabbitService.createChat(infoChat.idSala, infoChat.userOfGroup)
+        //rabbitService.createChat(infoChat.id, infoChat.contacts)
     }
 
     @PostMapping("/updateChat")

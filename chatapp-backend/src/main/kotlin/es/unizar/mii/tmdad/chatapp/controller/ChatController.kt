@@ -54,6 +54,7 @@ class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOpera
         chatrooms.add(chatRoom)
 
         // TODO CREATE EXCHANGE BINDING
+        //rabbitService.createChat(id, contacts)
 //        simpMessageSendingOperations.convertAndSendToUser(loggedInUser.id.toString(), "/queue/messages", message)
     }
 
