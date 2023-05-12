@@ -27,6 +27,7 @@ import java.security.Principal
 @EnableWebSocketMessageBroker
 class WebSocketConfig(
     private val authenticationChannelInterceptor: AuthenticationChannelInterceptor,
+    private val subscriptionChannelInterceptor: SubscriptionChannelInterceptor,
     private val applicationContext: ApplicationContext,
 ): WebSocketMessageBrokerConfigurer{
 
@@ -58,14 +59,16 @@ class WebSocketConfig(
         interceptor.setAuthorizationEventPublisher(SpringAuthorizationEventPublisher(applicationContext))
         interceptor.setSecurityContextHolderStrategy(securityContextHolderStrategy)
         securityContextChannelInterceptor.setSecurityContextHolderStrategy(securityContextHolderStrategy)
-        registration.interceptors(authenticationChannelInterceptor, securityContextChannelInterceptor, interceptor)
+        registration.interceptors(
+            authenticationChannelInterceptor,
+            securityContextChannelInterceptor,
+            interceptor,
+            subscriptionChannelInterceptor)
     }
 
 
     fun messageAuthorizationManager(messages: MessageMatcherDelegatingAuthorizationManager.Builder): AuthorizationManager<Message<*>> {
         messages
-//            .simpMessageDestMatchers("/topic","/queue").denyAll()
-//            .simpMessageDestMatchers("/cmd/**").authenticated()
             .simpMessageDestMatchers("/chat/broadcast").hasRole("ADMIN")
             .anyMessage().authenticated()
         return messages.build()

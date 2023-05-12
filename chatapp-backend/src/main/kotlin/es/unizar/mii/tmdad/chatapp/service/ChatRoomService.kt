@@ -1,10 +1,12 @@
 package es.unizar.mii.tmdad.chatapp.service
+import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
+import es.unizar.mii.tmdad.chatapp.repository.ChatRoomRepository
 import org.springframework.stereotype.Service
 import java.nio.ByteBuffer
 import java.util.UUID
 
 @Service
-class ChatService (){
+class ChatRoomService (private val chatRoomRepository: ChatRoomRepository){
     private fun convertUUIDToBytes(uuid: UUID): ByteArray? {
         val bb = ByteBuffer.wrap(ByteArray(16))
         bb.putLong(uuid.mostSignificantBits)
@@ -29,19 +31,8 @@ class ChatService (){
         return UUID(high,low)
     }
 
-
-    fun registerUserQueue(user: UserEntity){
-        //Cuando un usuario se conecta al sistema se crea el topic se hace el biding y se activa el consumidor
-
-        val exchangeName="${user.username}-user-exchange"
-        val queueName="${user.username}.inbox"
-
-        channel.exchangeDeclare(exchangeName, "direct", true);
-        channel.queueDeclare(queueName, true, false, false, null);
-        channel.queueBind(queueName, exchangeName, null);
-
-        //Bind con el exchange broadcast (solo podran enviar mensajes los usuarios con ROLE=superuser)
-        channel.exchangeBind(exchangeName, "broadcast", null)
+    fun save(chatRoom: ChatRoom): ChatRoom {
+        return chatRoomRepository.save(chatRoom)
     }
 
 }

@@ -50,7 +50,7 @@ class RabbitConfig {
             try {
                 val cliente = Client(
                     ClientParameters()
-                        .url("http://127.0.0.1:15672/api/")
+                        .url("http://rabbitmq:15672/api/")
                         .username("guest")
                         .password("guest")
                 );

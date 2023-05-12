@@ -47,7 +47,7 @@ class AuthController(
 
         val registeredUser = userService.register(user)
 
-        rabbitService.registRabbit(user.email)
+
 
         val jwt = jwtService.generateToken(registeredUser)
 
@@ -72,8 +72,6 @@ class AuthController(
         )
 
         val jwt = jwtService.generateToken(authentication.principal as UserEntity)
-
-        rabbitService.activeConsumer(user.username)
 
         return ResponseEntity.ok(AuthenticationResponse(
             accessToken = jwt,

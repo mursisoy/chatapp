@@ -49,25 +49,30 @@ class ApplicationConfig(
 
     @Bean
     fun databaseInitializer(userService: UserService) = ApplicationRunner {
-
-        userService.register(UserEntity(
-            email = "admin@chatapp.local",
-            password = passwordEncoder().encode("admin"),
-            firstName = "Foo",
-            lastName = "Bar",
-            role = Role.ADMIN
-        ))
-
-        for (i in 1..20) {
+        try {
             userService.register(
                 UserEntity(
-                    email = "user${i}@chatapp.local",
-                    password = passwordEncoder().encode("user${i}"),
-                    firstName = "User",
-                    lastName = i.toString().padStart(2,'0'),
-                    role = Role.USER
+                    email = "admin@chatapp.local",
+                    password = passwordEncoder().encode("admin"),
+                    firstName = "Foo",
+                    lastName = "Bar",
+                    role = Role.ADMIN
                 )
             )
+
+            for (i in 1..20) {
+                userService.register(
+                    UserEntity(
+                        email = "user${i}@chatapp.local",
+                        password = passwordEncoder().encode("user${i}"),
+                        firstName = "User",
+                        lastName = i.toString().padStart(2, '0'),
+                        role = Role.USER
+                    )
+                )
+            }
+        }catch (e: Exception) {
+
         }
     }
 }

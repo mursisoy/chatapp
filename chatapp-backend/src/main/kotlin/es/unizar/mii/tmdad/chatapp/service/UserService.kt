@@ -9,11 +9,13 @@ import java.util.UUID
 @Service
 class UserService(
     private val userRepository: UserRepository,
-//    private val channel: Channel
+    private val rabbitService: RabbitService
 )  {
     fun register(user: UserEntity): UserEntity {
         // Insert the user
-        return userRepository.save(user)
+        val newUser =  userRepository.save(user)
+        rabbitService.registRabbit(newUser.username.toString())
+        return newUser
     }
 
     fun getAllUsers(): List<UserEntity>{

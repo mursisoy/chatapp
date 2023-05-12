@@ -1,9 +1,19 @@
 package es.unizar.mii.tmdad.chatapp.dao
 
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import java.util.UUID
 
+@Entity
 class ChatRoom (
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID = UUID.randomUUID(),
-    val owner: UserEntity? = null,
-    val contacts: Set<String>
+    val owner: UUID?,
+    @Transient
+    val contacts: Set<String>,
+    val name: String?,
+    val type: ChatRoomType,
 )

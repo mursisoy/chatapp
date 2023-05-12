@@ -4,7 +4,8 @@ import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.dto.*
-import es.unizar.mii.tmdad.chatapp.service.ChatService
+import es.unizar.mii.tmdad.chatapp.service.ChatRoomService
+import es.unizar.mii.tmdad.chatapp.service.RabbitService
 import es.unizar.mii.tmdad.chatapp.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -23,11 +24,12 @@ import java.util.*
 
 @Controller
 @RequestMapping("/api/v1/chat")
-class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOperations,
-    private val userService: UserService,
-    private val chatService: ChatService){
+class ChatController (val simpMessageSendingOperations: SimpMessageSendingOperations,
+                      private val userService: UserService,
+                      private val chatRoomService: ChatRoomService,
+                      private val rabbitService: RabbitService){
 
-    private val chatrooms = mutableListOf<ChatRoom>()
+//    private val chatrooms = mutableListOf<ChatRoom>()
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("contacts")
@@ -56,11 +58,12 @@ class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOpera
     }
 
     @PostMapping("/conversation")
-    fun newConversation(authentication: Authentication, @Payload chatRoomRequest: NewChatRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<ContactListResponse> {
+    fun newConversation(authentication: Authentication, @Payload chatRoomRequest: NewChatRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<NewChatResponse> {
         val loggedInUser = authentication.principal as UserEntity
         var roomUUID: UUID = UUID.randomUUID()
+        val contacts = chatRoomRequest.contacts.toSet()
         if ( chatRoomRequest.type == ChatRoomType.COUPLE) {
-            val contacts = chatRoomRequest.contacts.toSet()
+
             if (contacts.size > 2) {
                 return ResponseEntity.unprocessableEntity().build()
             }
@@ -69,19 +72,29 @@ class ChatController ( val simpMessageSendingOperations: SimpMessageSendingOpera
                 return ResponseEntity.unprocessableEntity().build()
             }
 
-            roomUUID = chatService.coupleChatUUID(
+            roomUUID = chatRoomService.coupleChatUUID(
                 UUID.fromString(contacts.elementAt(0)),
                 UUID.fromString(contacts.elementAt(1))
             )
         }
-//            val chatRoom = ChatRoom(
-//                id = UUID(high,low),
-//                contacts = message.contacts.toSet())
-//            chatrooms.add(chatRoom)
 
-        // TODO CREATE EXCHANGE BINDING
-        //rabbitService.createChat(chatRoom.id, chatRoom.contacts)
-//        simpMessageSendingOperations.convertAndSendToUser(loggedInUser.id.toString(), "/queue/messages", message)
+        val chatRoom = ChatRoom(
+            id = roomUUID,
+            contacts = contacts,
+            owner = loggedInUser.username,
+            name = chatRoomRequest.name,
+            type = chatRoomRequest.type
+        )
+        chatRoomService.save(chatRoom)
+        rabbitService.createChat(chatRoom)
+
+        return ResponseEntity.ok(NewChatResponse(
+            id = chatRoom.id.toString(),
+            contacts = chatRoom.contacts.toList(),
+            type = chatRoom.type.toString(),
+            owner = chatRoom.owner.toString(),
+            name = chatRoom.name
+        ))
     }
 
     @MessageMapping("/message")

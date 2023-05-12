@@ -9,14 +9,20 @@ import java.io.IOException
 import java.util.Vector
 
 import com.rabbitmq.http.client.Client;
+import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
+import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
+import es.unizar.mii.tmdad.chatapp.dao.UserEntity
+import org.slf4j.LoggerFactory
 
 @Service
 class RabbitService (private val channel: Channel,
+                     private val rabbitManageService: RabbitManageService,
     private val cliente: Client){
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun registRabbit(username: String ){
-        val exchangeName=username+"Exchange"
-        val queueName=username+"Queue"
+        val exchangeName=username+"-exchange"
+        val queueName=username+"-queue"
         val routingKey="*"
 
         channel.exchangeDeclare(exchangeName, "direct", true)
@@ -28,13 +34,11 @@ class RabbitService (private val channel: Channel,
 
     }
 
-    fun activeConsumer(username: String){
+    fun activeConsumer(username: String, sessionId: String){
 
-        val queueName=username+"Queue"
+        val queueName=username+"-queue"
 
-        val consumerTag=username
-
-        channel.basicConsume(queueName, false, consumerTag,
+        val consumerTag = channel.basicConsume(queueName, false, sessionId,
             object : DefaultConsumer(channel) {
                 @Throws(IOException::class)
                 override fun handleDelivery(
@@ -51,6 +55,8 @@ class RabbitService (private val channel: Channel,
 
                 }
             })
+        logger.debug(consumerTag)
+        logger.debug(rabbitManageService.activeUsers()?.map { it.consumerTag }.toString())
     }
 
     fun desactiveConsumer(username: String){
@@ -61,24 +67,27 @@ class RabbitService (private val channel: Channel,
         channel.basicPublish(exchangeName, "*", null, message.toByteArray())
     }
 
-    fun createChat(idSala: String, userOfGroup: Vector<String>){
+    fun createChat(chatRoom: ChatRoom){
         //argumentos asociados al exchange de sala
         val args=mutableMapOf<String, Any>()
-        if(userOfGroup.size==2){
-            args["tipo"]="individual"
+        if(chatRoom.contacts.size==2){
+            args["tipo"]=ChatRoomType.COUPLE
         }
         else{
-            args["tipo"]="grupo"
+            args["tipo"]=ChatRoomType.GROUP
         }
-        args["admin"]=userOfGroup[0]
+
+        if (chatRoom.owner != null) {
+            args["admin"] = chatRoom.owner
+        }
 
         //crear exchange con idSala
-        channel.exchangeDeclare(idSala, "fanout", true, false, args);
+        channel.exchangeDeclare(chatRoom.id.toString(), "fanout", true, false, args);
         //durable para que sobreviva reinicios y no autodelete para que no se borre si no se usa
 
         //crear binding entre el exchange de la sala y el de los usuarios pertenecientes a esta
-        for (user in userOfGroup) {
-            channel.exchangeBind(user + "Exchange", idSala, "*")
+        for (user in chatRoom.contacts) {
+            channel.exchangeBind("$user-exchange", chatRoom.id.toString(), "*")
         }
     }
 
@@ -86,18 +95,17 @@ class RabbitService (private val channel: Channel,
         //obtención de los argumentos del exchange
         val exchange= cliente.getExchange("/", idSala)
         val exchArgs=exchange.arguments
-
         if (origin == exchArgs["admin"]) {
-            if (exchArgs["tipo"] == "grupo") {
+            if (exchArgs["tipo"] == ChatRoomType.GROUP) {
                 if (action == "delete") {
                     for (user in usersAffected) {
                         //unbindings
-                        channel.exchangeUnbind(user + "Exchange", idSala, "*")
+                        channel.exchangeUnbind(user + "-exchange", idSala, "*")
                     }
                 }
                 if (action == "add") {
                     for (user in usersAffected) {
-                        channel.exchangeBind(user+ "Exchange", idSala, "*")
+                        channel.exchangeBind(user+ "-exchange", idSala, "*")
                     }
                 }
             }
@@ -111,7 +119,7 @@ class RabbitService (private val channel: Channel,
         val exchange= cliente.getExchange("/", idSala)
         val exchArgs=exchange.arguments
         //borrar exchange de la sala si eres el propietario
-        if (exchArgs["tipo"] == "grupo") {
+        if (exchArgs["tipo"] == ChatRoomType.GROUP) {
             if (origin ==  exchArgs["admin"]) {
                 //delete biding
                 channel.exchangeDelete(idSala)
