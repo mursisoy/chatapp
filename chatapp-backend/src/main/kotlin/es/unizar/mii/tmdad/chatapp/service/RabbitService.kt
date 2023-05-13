@@ -120,6 +120,12 @@ class RabbitService (private val channel: Channel,
                     channel.exchangeUnbind(user + "-exchange", idSala, "*")
                 }
             }
+            else{
+                throw ChatAuthorizationException(" It is not a group")
+            }
+        }
+        else{
+            throw ChatAuthorizationException(" You are not the admin of the group")
         }
 
     }
@@ -135,7 +141,11 @@ class RabbitService (private val channel: Channel,
                 //delete biding
                 channel.exchangeDelete(idSala)
             }
-        } else {
+            else{
+                throw ChatAuthorizationException(" You are not the admin of the group")
+            }
+        }
+        else {
             channel.exchangeDelete(idSala)
         }
 
