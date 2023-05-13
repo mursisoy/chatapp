@@ -91,22 +91,33 @@ class RabbitService (private val channel: Channel,
         }
     }
 
-    fun updateChat(origin: String, idSala: String, action:String, usersAffected: Vector<String>){
+    fun addConversationContacts(origin: String, idSala: String, usersAffected: Vector<String>){
         //obtención de los argumentos del exchange
         val exchange= cliente.getExchange("/", idSala)
         val exchArgs=exchange.arguments
         if (origin == exchArgs["admin"]) {
             if (exchArgs["tipo"] == ChatRoomType.GROUP) {
-                if (action == "delete") {
-                    for (user in usersAffected) {
-                        //unbindings
-                        channel.exchangeUnbind(user + "-exchange", idSala, "*")
-                    }
+                for (user in usersAffected) {
+                    channel.exchangeBind(user + "-exchange", idSala, "*")
                 }
-                if (action == "add") {
-                    for (user in usersAffected) {
-                        channel.exchangeBind(user+ "-exchange", idSala, "*")
-                    }
+            } else {
+                throw ChatAuthorizationException(" It is not  group ")
+            }
+        } else {
+            throw ChatAuthorizationException(" You are not the admin of the group")
+        }
+    }
+
+
+    fun deleteConversationContacts(origin: String, idSala: String, usersAffected: Vector<String>){
+        //obtención de los argumentos del exchange
+        val exchange= cliente.getExchange("/", idSala)
+        val exchArgs=exchange.arguments
+        if (origin == exchArgs["admin"]) {
+            if (exchArgs["tipo"] == ChatRoomType.GROUP) {
+                for (user in usersAffected) {
+                    //unbindings
+                    channel.exchangeUnbind(user + "-exchange", idSala, "*")
                 }
             }
         }
