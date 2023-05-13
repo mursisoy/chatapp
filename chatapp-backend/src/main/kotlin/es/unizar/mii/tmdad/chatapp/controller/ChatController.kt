@@ -15,9 +15,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.nio.ByteBuffer
 import java.security.Principal
 import java.util.*
@@ -58,7 +56,7 @@ class ChatController (val simpMessageSendingOperations: SimpMessageSendingOperat
     }
 
     @PostMapping("/conversation")
-    fun newConversation(authentication: Authentication, @Payload chatRoomRequest: NewChatRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<NewChatResponse> {
+    fun newConversation(authentication: Authentication, @RequestBody chatRoomRequest: NewChatRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<NewChatResponse> {
         val loggedInUser = authentication.principal as UserEntity
         var roomUUID: UUID = UUID.randomUUID()
         val contacts = chatRoomRequest.contacts.toSet()
@@ -95,6 +93,26 @@ class ChatController (val simpMessageSendingOperations: SimpMessageSendingOperat
             owner = chatRoom.owner.toString(),
             name = chatRoom.name
         ))
+    }
+
+    @DeleteMapping("/conversation")
+    fun deleteConversation(authentication: Authentication, @RequestBody infoDelete: DeleteChatRequest) {
+        val loggedInUser = authentication.principal as UserEntity
+        rabbitService.deleteChat(loggedInUser.getUsername(), infoDelete.id)
+    }
+
+    @PutMapping("/conversation/contacts")
+    fun addConversationContacts(authentication: Authentication, @RequestBody updateConversationContactsRequest: UpdateConversationContactsRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<String> {
+        val loggedInUser = authentication.principal as UserEntity
+        rabbitService.addConversationContacts(loggedInUser.getUsername(), updateConversationContactsRequest.id, updateConversationContactsRequest.contacts)
+        return ResponseEntity.ok().build()
+    }
+
+    @DeleteMapping("/conversation/contacts")
+    fun deleteConversationContacts(authentication: Authentication, @RequestBody updateConversationContactsRequest: UpdateConversationContactsRequest, @Header("simpSessionId") sessionId: String): ResponseEntity<String> {
+        val loggedInUser = authentication.principal as UserEntity
+        rabbitService.deleteConversationContacts(loggedInUser.getUsername(), updateConversationContactsRequest.id, updateConversationContactsRequest.contacts)
+        return ResponseEntity.ok().build()
     }
 
     @MessageMapping("/message")

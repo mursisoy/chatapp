@@ -12,6 +12,7 @@ import com.rabbitmq.http.client.Client;
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
+import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import org.slf4j.LoggerFactory
 
 @Service
