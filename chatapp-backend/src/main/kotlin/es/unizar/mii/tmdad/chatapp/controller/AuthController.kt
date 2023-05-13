@@ -31,8 +31,8 @@ class AuthController(
 ) {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException::class)
-    fun handleNotFoundException(e: NoSuchElementException): ResponseEntity<Map<String, String?>> {
-        return ResponseEntity(mapOf("message" to e.message), HttpStatus.NOT_FOUND)
+    fun handleNotFoundException(e: UserNotFoundException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.FORBIDDEN)
     }
 
     @PostMapping("/register")
