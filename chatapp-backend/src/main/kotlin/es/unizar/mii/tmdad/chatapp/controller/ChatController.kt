@@ -140,6 +140,7 @@ class ChatController(
             name = chatRoomRequest.name,
             type = chatRoomRequest.type
         )
+
         chatRoomService.save(chatRoom)
         rabbitService.createChat(chatRoom)
 
@@ -160,7 +161,7 @@ class ChatController(
         rabbitService.deleteChat(loggedInUser.getUsername(), infoDelete.id)
     }
 
-    @PutMapping("/conversation/contacts")
+    @PatchMapping("/conversation/contacts")
     fun addConversationContacts(
         authentication: Authentication,
         @RequestBody updateConversationContactsRequest: UpdateConversationContactsRequest
@@ -169,25 +170,16 @@ class ChatController(
         rabbitService.addConversationContacts(
             loggedInUser.getUsername(),
             updateConversationContactsRequest.id,
-            updateConversationContactsRequest.contacts
+            updateConversationContactsRequest.addContacts
+        )
+        rabbitService.deleteConversationContacts(
+            loggedInUser.getUsername(),
+            updateConversationContactsRequest.id,
+            updateConversationContactsRequest.removeContacts
         )
         return ResponseEntity.ok().build()
     }
 
-    @DeleteMapping("/conversation/contacts")
-    fun deleteConversationContacts(
-        authentication: Authentication,
-        @RequestBody updateConversationContactsRequest:
-        UpdateConversationContactsRequest
-    ): ResponseEntity<String> {
-        val loggedInUser = authentication.principal as UserEntity
-        rabbitService.deleteConversationContacts(
-            loggedInUser.getUsername(),
-            updateConversationContactsRequest.id,
-            updateConversationContactsRequest.contacts
-        )
-        return ResponseEntity.ok().build()
-    }
 
     @MessageMapping("/message")
     fun message(
