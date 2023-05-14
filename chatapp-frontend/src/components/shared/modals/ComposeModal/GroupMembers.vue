@@ -52,8 +52,8 @@ const handleSelectedContactsChange = (contact: IContact) => {
     <!--contacts-->
     <ScrollBox class="overflow-y-scroll max-h-[200px] mb-5">
       <ContactItem
-        v-if="store.status === 'success' && !store.delayLoading && store.user"
-        v-for="(contact, index) in store.user.contacts"
+        v-if="store.status === 'success' && !store.delayLoading"
+        v-for="(contact, index) in store.contacts"
         :contact="contact"
         @click="handleSelectedContactsChange(contact)"
         :active="isContactSelected(contact)"

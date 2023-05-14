@@ -3,7 +3,7 @@ import type {Ref} from "vue";
 import type {IConversation, IMessage} from "@src/types";
 
 import useStore from "@src/store/store";
-import {ref, inject, onMounted} from "vue";
+import {ref, inject, onMounted, computed} from "vue";
 import {getConversationIndex, getOddContact} from "@src/utils";
 import {v4 as uuidv4} from "uuid";
 
@@ -76,6 +76,11 @@ const handleSetDraft = () => {
   }
 };
 
+const canWriteMessage = computed(() => {
+  return activeConversation.type != "BROADCAST" || store.user?.role == "ADMIN"
+})
+
+
 function sendMessage() {
   const message: IMessage = {
     date: new Date().getTime(),
@@ -109,7 +114,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full" v-if="canWriteMessage">
     <!--selected reply display-->
     <div
         class="relative transition-all duration-200"

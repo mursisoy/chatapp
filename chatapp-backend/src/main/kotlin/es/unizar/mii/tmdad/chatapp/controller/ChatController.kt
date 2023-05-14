@@ -209,9 +209,13 @@ class ChatController(
         )
 
 
-        if ( rabbitManageService.authorizeSendToGroup(
-                rns.getConversationExchangeName(conversationId),
-                rns.getUserExchangeName(loggedInUser.id)
+        if ((   conversationId != rns.BROADCAST_QUEUE_ID &&
+                rabbitManageService.authorizeSendToGroup(
+                    rns.getConversationExchangeName(conversationId),
+                    rns.getUserExchangeName(loggedInUser.id) ) ||
+                ( conversationId == rns.BROADCAST_QUEUE_ID &&
+                  authentication.authorities.stream().anyMatch { a-> a.authority.equals("ADMIN")} )
+
         )) {
             // Use StompCommand.RECEIPT if SimpleStompBroker were compatible :(
 //            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE)
