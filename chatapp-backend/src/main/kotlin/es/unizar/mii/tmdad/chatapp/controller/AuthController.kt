@@ -45,7 +45,6 @@ class AuthController(
         val registeredUser = userService.register(user)
 
 
-
         val jwt = jwtService.generateToken(registeredUser)
 
         val response = AuthenticationResponse(

@@ -6,6 +6,7 @@ import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.dto.*
+import es.unizar.mii.tmdad.chatapp.repository.MessageRepository
 import es.unizar.mii.tmdad.chatapp.service.*
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
@@ -34,7 +35,9 @@ class ChatController(
     private val chatRoomService: ChatRoomService,
     private val rabbitService: RabbitService,
     private val rabbitManageService: RabbitManageService,
-    private val minioService: MinioService
+    private val rns: RabbitNamingService,
+    private val minioService: MinioService,
+    private val messageRepository: MessageRepository
 ) {
 
     //    private val chatrooms = mutableListOf<ChatRoom>()
@@ -81,9 +84,9 @@ class ChatController(
     @GetMapping("conversations/{conversationId}")
     fun getConversation(
         authentication: Authentication,
-        @PathVariable conversationId: String): ResponseEntity<ConversationListResponse> {
+        @PathVariable conversationId: UUID): ResponseEntity<ConversationListResponse> {
         try {
-            val conversation = rabbitManageService.getConversationExchange(UUID.fromString(conversationId))
+            val conversation = rabbitManageService.getConversationExchange(conversationId)
             return if (conversation != null) {
                 ResponseEntity.ok(
                     ConversationListResponse(
@@ -110,15 +113,17 @@ class ChatController(
 
 
 
-    @PostMapping("/conversations")
+    @PostMapping("conversations")
     fun newConversation(
         authentication: Authentication,
         @RequestBody chatRoomRequest: NewChatRequest
     ): ResponseEntity<NewChatResponse> {
         val loggedInUser = authentication.principal as UserEntity
         var roomUUID: UUID = UUID.randomUUID()
+        var owner: UUID? = loggedInUser.id
         val contactSet = chatRoomRequest.contacts.toSet()
         val contacts = contactSet.map { userService.loadUserByUsername(it).id }.toSet()
+
         if (chatRoomRequest.type == ChatRoomType.COUPLE) {
             if (contacts.size != 2) {
                 return ResponseEntity.unprocessableEntity().build()
@@ -131,14 +136,15 @@ class ChatController(
                 contacts.elementAt(0),
                 contacts.elementAt(1)
             )
+            owner = null
         }
 
         val chatRoom = ChatRoom(
             id = roomUUID,
             contacts = contacts,
-            owner = loggedInUser.id,
+            owner = owner,
             name = chatRoomRequest.name,
-            type = chatRoomRequest.type
+            type = chatRoomRequest.type.name
         )
 
         chatRoomService.save(chatRoom)
@@ -148,17 +154,20 @@ class ChatController(
             NewChatResponse(
                 id = chatRoom.id.toString(),
                 contacts = contactSet.map { ContactInfoResponse(username = it) },
-                type = chatRoom.type.toString(),
+                type = chatRoom.type,
                 owner = chatRoom.owner.toString(),
                 name = chatRoom.name
             )
         )
     }
 
-    @DeleteMapping("/conversation")
-    fun deleteConversation(authentication: Authentication, @RequestBody infoDelete: DeleteChatRequest) {
+    @DeleteMapping("conversations/{conversationId}")
+    fun deleteConversation(
+        authentication: Authentication,
+        @RequestBody infoDelete: DeleteChatRequest,
+        @PathVariable conversationId: UUID) {
         val loggedInUser = authentication.principal as UserEntity
-        rabbitService.deleteChat(loggedInUser.getUsername(), infoDelete.id)
+        rabbitService.deleteChat(loggedInUser.id, conversationId)
     }
 
     @PatchMapping("/conversation/contacts")
@@ -168,12 +177,12 @@ class ChatController(
     ): ResponseEntity<String> {
         val loggedInUser = authentication.principal as UserEntity
         rabbitService.addConversationContacts(
-            loggedInUser.getUsername(),
+            loggedInUser.id,
             updateConversationContactsRequest.id,
             updateConversationContactsRequest.addContacts
         )
         rabbitService.deleteConversationContacts(
-            loggedInUser.getUsername(),
+            loggedInUser.id,
             updateConversationContactsRequest.id,
             updateConversationContactsRequest.removeContacts
         )
@@ -188,25 +197,50 @@ class ChatController(
         @Header(StompHeaderAccessor.STOMP_RECEIPT_HEADER) receiptId: String
     ) {
         val loggedInUser = authentication.principal as UserEntity
+        val conversationId = UUID.fromString(draftMessage.to)
         val newMessage = ChatMessage(
             id = Generators.timeBasedGenerator().generate(),
             date = draftMessage.date,
-            from = UUID.fromString(draftMessage.from),
-            to = UUID.fromString(draftMessage.to),
+            from_id = loggedInUser.id,
+            from = loggedInUser.username,
+            to = conversationId,
             content =  draftMessage.content,
             media = draftMessage.media
         )
 
-        val receipt = StompHeaderAccessor.create(StompCommand.MESSAGE)
-        receipt.receiptId = receiptId
-        if (rabbitService.sendMessage(newMessage) ) {
-            simpMessageSendingOperations.convertAndSendToUser(
-                loggedInUser.username, "/queue/messages",
-                newMessage,receipt.messageHeaders)
+
+        if ( rabbitManageService.authorizeSendToGroup(
+                rns.getConversationExchangeName(conversationId),
+                rns.getUserExchangeName(loggedInUser.id)
+        )) {
+            // Use StompCommand.RECEIPT if SimpleStompBroker were compatible :(
+//            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE)
+//            headers.receiptId = receiptId
+            messageRepository.save(newMessage)
+            rabbitService.sendMessage(newMessage)
+//            if (rabbitService.sendMessage(newMessage)) {
+//
+//                simpMessageSendingOperations.convertAndSendToUser(
+//                    loggedInUser.username, "/queue/notifications",
+//                    newMessage, receipt.messageHeaders
+//                )
+//            } else {
+//                simpMessageSendingOperations.convertAndSendToUser(
+//                    loggedInUser.username, "/queue/notifications",
+//                    intArrayOf(0), receipt.messageHeaders
+//                )
+//            }
         } else {
+            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE,
+                mapOf("status-code" to listOf("401")))
+            headers.receiptId = receiptId
             simpMessageSendingOperations.convertAndSendToUser(
-                loggedInUser.username, "/queue/messages",
-                intArrayOf(0),receipt.messageHeaders)
+                loggedInUser.username, "/queue/notifications",
+                ChatNotification(
+                    type = ChatNotificationType.ERROR,
+                    content = "Authorization denied"
+                ), headers.messageHeaders
+            )
         }
     }
 

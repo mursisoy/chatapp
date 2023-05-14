@@ -2,14 +2,24 @@ package es.unizar.mii.tmdad.chatapp.config
 
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.http.client.Client
+import com.rabbitmq.http.client.ClientParameters
+import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
+import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
+import es.unizar.mii.tmdad.chatapp.service.ChatRoomService
+import es.unizar.mii.tmdad.chatapp.service.RabbitNamingService
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.ConnectException
 
-import com.rabbitmq.http.client.Client
-import com.rabbitmq.http.client.ClientParameters
 @Configuration
-class RabbitConfig {
+class RabbitConfig (
+    private val rns: RabbitNamingService,
+    private val chatRoomService: ChatRoomService
+){
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Bean
     fun channel() : Channel {
         val factory = ConnectionFactory()
@@ -29,13 +39,28 @@ class RabbitConfig {
             try {
                 val conn = factory.newConnection()
                 val channel = conn.createChannel()
-
+                try {
+                    chatRoomService.save(
+                        ChatRoom(
+                            id = rns.BROADCAST_QUEUE_ID,
+                            type = ChatRoomType.BROADCAST.name,
+                            owner = null,
+                            contacts = emptySet(),
+                            name = "Anuncios"
+                        )
+                    )
+                } catch (e: Exception){
+                    logger.error(e.stackTraceToString())
+                }
                 //crear exchange broadcast
-                channel.exchangeDeclare("broadcast", "fanout", true, false, false,
+                channel.exchangeDeclare(rns.getBroadcastExchangeName(), "fanout", true, false, false,
                     mutableMapOf(
-                        "type" to "BROADCAST"
+                        "type" to ChatRoomType.BROADCAST.name,
+                        "name" to "Anuncios",
+                        "id" to rns.BROADCAST_QUEUE_ID.toString()
                     ) as Map<String, Any>?
                 )
+
 
                 return channel
             } catch (e: ConnectException) {

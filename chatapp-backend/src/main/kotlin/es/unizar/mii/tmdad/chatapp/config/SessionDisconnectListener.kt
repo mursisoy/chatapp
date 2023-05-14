@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
+import java.io.IOException
 
 
 @Component
@@ -20,23 +21,27 @@ class HandleWebSocketDisconnectListener(
 
     @EventListener
     fun bye(event: SessionDisconnectEvent) {
-
         val headerAccessor: SimpMessageHeaderAccessor = SimpMessageHeaderAccessor.wrap(event.message)
         val id = headerAccessor.sessionId as String
-        rabbitService.desactiveConsumer(id)
+        deactivateConsumer(id)
     }
 
     @PreDestroy
     fun destroy() {
+        logger.debug("Callback triggered - @PreDestroy. Deactivating consumers...")
         for (user in simpUserRegistry.users){
             for (session in user.sessions) {
-                rabbitService.desactiveConsumer(session.id)
+                deactivateConsumer(session.id)
             }
         }
-        logger.debug(
-            "Callback triggered - @PreDestroy."
-        )
 
+    }
+    fun deactivateConsumer(username: String){
+        try {
+            rabbitService.getChannel().basicCancel(username)
+        } catch (e: IOException) {
+            logger.error(e.message)
+        }
     }
 
 }

@@ -1,38 +1,28 @@
 package es.unizar.mii.tmdad.chatapp.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
-import com.rabbitmq.client.DefaultConsumer
-import com.rabbitmq.client.Envelope
 import com.rabbitmq.http.client.Client
 import es.unizar.mii.tmdad.chatapp.dao.ChatMessage
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
-import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Lazy
-import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.stereotype.Service
-import java.io.IOException
 import java.util.*
-
 
 @Service
 class RabbitService (private val channel: Channel,
                      private val rabbitManageService: RabbitManageService,
-                     private val cliente: Client){
+                     private val cliente: Client,
+    private val rns: RabbitNamingService){
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Autowired
-    @Lazy
-    private lateinit var simpMessageSendingOperations: SimpMessageSendingOperations
 
-    fun registRabbit(username: String ){
-        val exchangeName= "$username-ux"
-        val queueName= "$username-uq"
+
+    fun registRabbit(userId: UUID ){
+        val exchangeName= rns.getUserExchangeName(userId)
+        val queueName= rns.getUserQueueName(userId)
         val routingKey="*"
 
         channel.exchangeDeclare(exchangeName, "direct", true)
@@ -40,51 +30,22 @@ class RabbitService (private val channel: Channel,
         channel.queueBind(queueName, exchangeName, routingKey)
 
         //Bind con el exchange broadcast (solo podran enviar mensajes los usuarios con ROLE=superuser)
-        channel.exchangeBind(exchangeName, "broadcast", "*")
-
+        channel.exchangeBind(exchangeName, rns.getBroadcastExchangeName(), "*")
     }
 
-    fun activeConsumer(user: UserEntity, sessionId: String){
-
-        val queueName="${user.id}-uq"
-
-        val consumerTag = channel.basicConsume(queueName, false, sessionId,
-            object: DefaultConsumer(channel) {
-                @Throws(IOException::class)
-                override fun handleDelivery(
-                    consumerTag: String?,
-                    envelope: Envelope,
-                    properties: AMQP.BasicProperties,
-                    body: ByteArray?
-                ) {
-                    val routingKey = envelope.routingKey
-                    val contentType = properties.contentType
-                    val deliveryTag = envelope.deliveryTag
-                    // (process the message components here ...)
-                    channel.basicAck(deliveryTag, false)
-                    val mapper = ObjectMapper()
-                    simpMessageSendingOperations.convertAndSendToUser(user.username,"/queue/messages",mapper.readValue(body, ChatMessage::class.java))
-                }
-            })
-        logger.debug(consumerTag)
-        logger.debug(rabbitManageService.activeUsers()?.map { it.consumerTag }.toString())
+    fun getChannel(): Channel {
+        return channel
     }
 
-    fun desactiveConsumer(username: String){
-        try {
-            channel.basicCancel(username)
-        } catch (e: IOException) {
-            logger.error(e.message)
-        }
-    }
 
     fun sendMessage(message: ChatMessage): Boolean{
         val mapper = ObjectMapper()
+        val conversationExchange = rns.getConversationExchangeName(message.to)
         return if ( rabbitManageService.authorizeSendToGroup(
-                "${message.to}-cx",
-                "${message.from}-ux"
+                conversationExchange,
+                rns.getUserExchangeName(message.from_id)
             ) ) {
-            channel.basicPublish("${message.to}-cx", "*", null, mapper.writeValueAsBytes(message))
+            channel.basicPublish(conversationExchange, "*", null, mapper.writeValueAsBytes(message))
             true
         } else {
             false
@@ -95,34 +56,36 @@ class RabbitService (private val channel: Channel,
         //argumentos asociados al exchange de sala
         val args=mutableMapOf<String, Any>()
         if(chatRoom.contacts.size==2){
-            args["tipo"]=ChatRoomType.COUPLE.toString()
+            args["type"]=ChatRoomType.COUPLE.toString()
         }
         else{
-            args["tipo"]=ChatRoomType.GROUP.toString()
+            args["type"]=ChatRoomType.GROUP.toString()
         }
 
         if (chatRoom.owner != null) {
             args["admin"] = chatRoom.owner.toString()
         }
+        args["id"] = chatRoom.id.toString()
 
+        val conversationExchange = rns.getConversationExchangeName(chatRoom.id)
         //crear exchange con idSala
-        channel.exchangeDeclare("${chatRoom.id}-cx", "fanout", true, false, args)
+        channel.exchangeDeclare(conversationExchange, "fanout", true, false, args)
         //durable para que sobreviva reinicios y no autodelete para que no se borre si no se usa
 
         //crear binding entre el exchange de la sala y el de los usuarios pertenecientes a esta
         for (user in chatRoom.contacts) {
-            channel.exchangeBind("${user}-ux", "${chatRoom.id}-cx", "*")
+            channel.exchangeBind(rns.getUserExchangeName(user), conversationExchange, "*")
         }
     }
 
-    fun addConversationContacts(origin: String, idSala: String, usersAffected: Vector<String>){
+    fun addConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange("/", idSala)
+        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
-        if (origin == exchArgs["admin"].toString()) {
-            if (ChatRoomType.valueOf(exchArgs["tipo"] as String) == ChatRoomType.GROUP) {
+        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
+            if (ChatRoomType.valueOf("${exchArgs["type"]}") == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
-                    channel.exchangeBind("$user-ux", idSala, "*")
+                    channel.exchangeBind(rns.getUserExchangeName(user), exchange.name, "*")
                 }
             } else {
                 throw ChatAuthorizationException(" It is not  group ")
@@ -132,16 +95,15 @@ class RabbitService (private val channel: Channel,
         }
     }
 
-
-    fun deleteConversationContacts(origin: String, idSala: String, usersAffected: Vector<String>){
+    fun deleteConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange("/", idSala)
+        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
-        if (origin == exchArgs["admin"]) {
-            if (exchArgs["tipo"] == ChatRoomType.GROUP) {
+        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
+            if (exchArgs["type"] == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
                     //unbindings
-                    channel.exchangeUnbind("$user-ux", idSala, "*")
+                    channel.exchangeUnbind(rns.getUserExchangeName(user), exchange.name, "*")
                 }
             }
             else{
@@ -154,25 +116,17 @@ class RabbitService (private val channel: Channel,
 
     }
 
-
-    fun deleteChat(origin: String, idSala: String){
+    fun deleteChat(userId: UUID, conversationId: UUID,){
         //obtenecion de los argumentos del exchange de sala
-        val exchange= cliente.getExchange("/", idSala)
+        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
-        //borrar exchange de la sala si eres el propietario
-        if (exchArgs["tipo"] == ChatRoomType.GROUP) {
-            if (origin ==  exchArgs["admin"]) {
-                //delete biding
-                channel.exchangeDelete(idSala)
-            }
-            else{
+        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
+            if (exchArgs["type"] == ChatRoomType.GROUP) {
+                channel.exchangeDelete(exchange.name)
+            } else {
                 throw ChatAuthorizationException(" You are not the admin of the group")
             }
         }
-        else {
-            channel.exchangeDelete(idSala)
-        }
-
     }
 
 }

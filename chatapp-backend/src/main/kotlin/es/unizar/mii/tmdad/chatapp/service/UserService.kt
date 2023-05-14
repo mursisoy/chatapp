@@ -14,7 +14,7 @@ class UserService(
     fun register(user: UserEntity): UserEntity {
         // Insert the user
         val newUser =  userRepository.save(user)
-        rabbitService.registRabbit(newUser.id.toString())
+        rabbitService.registRabbit(newUser.id)
         return newUser
     }
 

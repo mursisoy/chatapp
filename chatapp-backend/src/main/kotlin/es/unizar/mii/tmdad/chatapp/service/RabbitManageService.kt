@@ -5,15 +5,17 @@ import com.rabbitmq.http.client.domain.BindingInfo
 import com.rabbitmq.http.client.domain.ConsumerDetails
 import com.rabbitmq.http.client.domain.ExchangeInfo
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
-import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class RabbitManageService (private val cliente: Client){
+class RabbitManageService (
+    private val cliente: Client,
+    private val rns: RabbitNamingService){
     private val logger = LoggerFactory.getLogger(javaClass)
+
 
 //    fun authorizeGroup(conversationId: String, username: String ): Boolean{
 //        val bindings=cliente.bindings
@@ -39,11 +41,11 @@ class RabbitManageService (private val cliente: Client){
     }
 
     fun getConversationExchange(conversationId: UUID) : ChatRoom? {
-        val exInfo = cliente.getExchange("/", "$conversationId-cx")
+        val exInfo = cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
         return if (exInfo != null) {
             ChatRoom(
-                id = conversationId,
-                type = ChatRoomType.valueOf(exInfo.arguments["tipo"].toString()),
+                id = UUID.fromString(exInfo.arguments["id"].toString()),
+                type = exInfo.arguments["type"].toString(),
                 contacts = getContactsFromExchange(conversationId),
                 owner = try{ UUID.fromString(exInfo.arguments["owner"].toString()) } catch (e: IllegalArgumentException){null},
                 name = exInfo.arguments["name"].toString()
@@ -54,7 +56,10 @@ class RabbitManageService (private val cliente: Client){
     }
 
     fun getContactsFromExchange(conversationId: UUID) : Set<UUID> {
-        val bindings = cliente.getBindingsBySource("/", "${conversationId}-cx")
+        if ( conversationId == rns.BROADCAST_QUEUE_ID)
+            return emptySet()
+
+        val bindings = cliente.getBindingsBySource("/", rns.getConversationExchangeName(conversationId))
         val contactList: MutableSet<UUID> = mutableSetOf()
         for(b in bindings!!) {
             if (b.destination.toString().endsWith("-ux")) {
@@ -71,7 +76,6 @@ class RabbitManageService (private val cliente: Client){
     fun getConversationsForUser(user: UserEntity) : List<ChatRoom> {
         val bindings = cliente.getExchangeBindingsByDestination("/", "${user.id}-ux")
         val conversationList: MutableList<ChatRoom> = mutableListOf()
-
         for(b in bindings!!) {
             try {
                 val cr = getConversationExchange(UUID.fromString(b.source.substring(0, b.source.length-3)))
@@ -89,7 +93,7 @@ class RabbitManageService (private val cliente: Client){
         val exchanges=getExchanges()
         var exchangeSalas: MutableList<ExchangeInfo> = mutableListOf()
         for (e in exchanges!!){
-            if (e.arguments["tipo"]!=null){
+            if (e.arguments["type"]!=null){
                 exchangeSalas.add(e)
             }
         }
@@ -100,7 +104,7 @@ class RabbitManageService (private val cliente: Client){
         val exchanges=getExchanges()
         var exchangeUsers: MutableList<ExchangeInfo> = mutableListOf()
         for (e in exchanges!!){
-            if (e.arguments["tipo"]==null){
+            if (e.arguments["type"]==null){
                 exchangeUsers.add(e)
             }
         }
