@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.ConnectException
 
-import com.rabbitmq.http.client.Client;
+import com.rabbitmq.http.client.Client
 import com.rabbitmq.http.client.ClientParameters
 @Configuration
 class RabbitConfig {
@@ -31,7 +31,11 @@ class RabbitConfig {
                 val channel = conn.createChannel()
 
                 //crear exchange broadcast
-                channel.exchangeDeclare("broadcast", "fanout", true)
+                channel.exchangeDeclare("broadcast", "fanout", true, false, false,
+                    mutableMapOf(
+                        "type" to "BROADCAST"
+                    ) as Map<String, Any>?
+                )
 
                 return channel
             } catch (e: ConnectException) {
@@ -53,7 +57,7 @@ class RabbitConfig {
                         .url("http://rabbitmq:15672/api/")
                         .username("guest")
                         .password("guest")
-                );
+                )
 
                 return cliente
             } catch (e: ConnectException) {

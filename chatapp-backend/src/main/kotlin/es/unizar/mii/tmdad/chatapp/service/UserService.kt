@@ -14,7 +14,7 @@ class UserService(
     fun register(user: UserEntity): UserEntity {
         // Insert the user
         val newUser =  userRepository.save(user)
-        rabbitService.registRabbit(newUser.username.toString())
+        rabbitService.registRabbit(newUser.id.toString())
         return newUser
     }
 
@@ -22,11 +22,11 @@ class UserService(
         return  userRepository.findAll()
     }
 
-    fun loadUserByUsername(username: UUID): UserEntity{
+    fun loadUserByUsername(username: String): UserEntity{
         return userRepository.findByUsername(username) ?: throw UserNotFoundException("User nor found")
     }
-    fun loadUserByEmail(email: String): UserEntity{
-        return userRepository.findByEmail(email) ?: throw UserNotFoundException("User nor found")
+    fun loadUserById(id: UUID): UserEntity{
+        return userRepository.findById(id) ?: throw UserNotFoundException("User nor found")
     }
 
 }

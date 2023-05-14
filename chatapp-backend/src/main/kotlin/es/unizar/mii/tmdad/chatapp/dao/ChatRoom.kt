@@ -13,7 +13,7 @@ class ChatRoom (
     val id: UUID = UUID.randomUUID(),
     val owner: UUID?,
     @Transient
-    val contacts: Set<String>,
+    val contacts: Set<UUID>,
     val name: String?,
     val type: ChatRoomType,
 )

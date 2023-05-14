@@ -5,7 +5,6 @@ import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import java.util.UUID
 
 interface UserRepository: JpaRepository<UserEntity, Int> {
-//    fun findByEmail(email: String): UserEntity?
-    fun findByEmail(email: String): UserEntity?
-    fun findByUsername(username: UUID): UserEntity?
+    fun findByUsername(username: String): UserEntity?
+    fun findById(id: UUID): UserEntity?
 }

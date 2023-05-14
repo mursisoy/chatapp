@@ -20,11 +20,15 @@ class JwtService {
 
     fun extractUser(token: String): UserDetails? {
         val claims: Claims = extractAllClaims(token)
-        return UserEntity(
-            email = claims["email"].toString(),
-            username = UUID.fromString(extractClaim(token, Claims::getSubject)),
-            role = enumValueOf<Role>(claims["role"].toString())
-        )
+        return try {
+            UserEntity(
+                id = UUID.fromString(claims["id"].toString()),
+                username = extractClaim(token, Claims::getSubject),
+                role = enumValueOf<Role>(claims["role"].toString())
+            )
+        } catch (e: IllegalArgumentException) {
+            null
+        }
     }
 
     fun <T> extractClaim(token: String, claimsResolver: Function<Claims, T>): T {
@@ -48,11 +52,9 @@ class JwtService {
     fun generateToken(user: UserEntity): String {
         return generateToken(
             hashMapOf(
+                "id" to user.id,
                 "username" to user.username,
-                "email" to user.email,
-                "role" to user.role,
-                "firstName" to user.firstName,
-                "lastName" to user.lastName
+                "role" to user.role
             ), user)
     }
 
@@ -63,7 +65,7 @@ class JwtService {
         return Jwts
             .builder()
             .setClaims(extraClaims)
-            .setSubject(user.username.toString())
+            .setSubject(user.username)
             .setIssuedAt(Date(System.currentTimeMillis()))
             .setExpiration(Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)
