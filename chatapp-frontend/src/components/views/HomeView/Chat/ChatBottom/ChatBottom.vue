@@ -80,8 +80,10 @@ function sendMessage() {
   const message: IMessage = {
     date: new Date().getTime(),
     content: value.value,
-    from: {username: store.user!.username},
-    state: "PENDING"
+    from: store.user!.username,
+    state: "PENDING",
+    id: null,
+    to: activeConversation.id
   }
   socketStore.sendMessage({
     date: message.date,

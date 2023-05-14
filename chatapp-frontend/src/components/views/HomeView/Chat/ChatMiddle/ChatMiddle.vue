@@ -33,7 +33,7 @@ const isFollowUp = (index: number, previousIndex: number): boolean => {
 
 // checks whether the message is sent by the authenticated user.
 const isSelf = (message: IMessage): boolean => {
-  return Boolean(store.user && message.from === store.user.id);
+  return Boolean(store.user && message.from === store.user.username);
 };
 
 // checks wether the new message has been sent in a new day or not.

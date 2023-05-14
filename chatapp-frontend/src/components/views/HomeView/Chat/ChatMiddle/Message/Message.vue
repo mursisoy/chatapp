@@ -90,11 +90,11 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
       <div class="mr-4" :class="{ 'ml-[36px]': props.followUp && !divider }">
         <div
           v-if="!hideAvatar()"
-          :aria-label="getFullName(props.message.from)"
+          :aria-label="props.message.from"
           class="outline-none"
         >
           <div
-            :style="{ backgroundImage: `url(${props.message.from.avatar})` }"
+            :style="{ backgroundImage: `url(${props.message.from})` }"
             class="w-[36px] h-[36px] bg-cover bg-center rounded-full"
           ></div>
         </div>

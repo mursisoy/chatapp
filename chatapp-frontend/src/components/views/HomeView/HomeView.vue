@@ -31,19 +31,25 @@ const activeChatComponent = computed(() => {
 });
 
 function onMessageReceived(message: StompMessage) {
+  console.log(message)
   if (message.body) {
     const conversationMessage: IMessage = JSON.parse(message.body)
-    const index = getConversationIndex(conversationMessage.to);
-    if (index !== undefined) {
-      if (store.conversations[index].messages == undefined) {
-        store.conversations[index].messages = []
-      }
-      store.conversations[index].messages.push(conversationMessage)
-    } else {
-
+    if(!addMessageToConversation(conversationMessage)) {
+      store.updateConversation(conversationMessage.to).then(result =>
+        addMessageToConversation(conversationMessage)
+      )
     }
   }
-  console.log(message)
+}
+function addMessageToConversation(conversationMessage: IMessage): Boolean {
+  const index = getConversationIndex(conversationMessage.to);
+  if (index == undefined)
+    return false
+  if (store.conversations[index].messages == undefined) {
+    store.conversations[index].messages = []
+  }
+  store.conversations[index].messages.push(conversationMessage)
+  return true
 }
 
 function onError(message: IFrame) {

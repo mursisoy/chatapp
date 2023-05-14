@@ -41,7 +41,7 @@ export interface IRecording {
 }
 
 export interface IMessage {
-  id: string;
+  id: string | null;
   type?: string;
   content?: string | IRecording;
   date: number;
@@ -60,7 +60,7 @@ export interface IConversation {
   avatar?: string;
   admins?: string[];
   contacts: IContact[];
-  messages: IMessage[];
+  messages: IMessage[] | udefined;
   pinnedMessage?: IMessage;
   pinnedMessageHidden?: boolean;
   replyMessage?: IMessage;

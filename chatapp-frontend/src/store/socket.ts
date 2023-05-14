@@ -12,12 +12,13 @@ const useSocketStore = defineStore("socket", () => {
 
     function connectionSuccess(frame: IFrame) {
         // eslint-disable-next-line
-        stompClient.subscribe('/user/queue/messages', messageReceivedCallback);
-        // stompClient.subscribe('/user/queue/receipts', cmdReceivedCallback)
+        stompClient.subscribe('/user/queue/messages', messageReceivedCallback)
+        stompClient.subscribe('/user/queue/notifications', notificationsReceivedCallback)
+        stompClient.subscribe('/user/queue/operations', notificationsReceivedCallback)
     }
 
-    function cmdReceivedCallback(message: StompMessage) {
-        console.debug("CMD RECEIVED", message)
+    function notificationsReceivedCallback(message: StompMessage) {
+        console.debug("NOTIFICATION RECEIVED", message)
     }
 
     let messageReceivedCallback: messageCallbackType = (message: StompMessage) => {console.log("Message received:",message)}
