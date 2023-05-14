@@ -38,7 +38,7 @@ const store = useStore();
       <!--profile image-->
       <div class="mr-4">
         <div
-          :style="{ backgroundImage: `url(${props.contact.avatar})` }"
+          :style="{ backgroundImage: `url(https://i.pravatar.cc/150?u=${props.contact.username})` }"
           class="w-7 h-7 rounded-full bg-cover bg-center"
         ></div>
       </div>

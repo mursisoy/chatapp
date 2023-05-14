@@ -31,7 +31,7 @@ const openImageViewer = ref(false);
 
 const imageUrl = computed(() => {
   if (props.contact) {
-    return props.contact.avatar;
+    return `https://i.pravatar.cc/150?u=${props.contact.username}`;
   } else {
     return getAvatar(props.conversation);
   }
@@ -96,7 +96,7 @@ const imageUrl = computed(() => {
             aria-label="view avatar"
           >
             <div
-              :style="{ backgroundImage: `url(${props.contact.avatar})` }"
+              :style="{ backgroundImage: `url(https://i.pravatar.cc/150?u=${props.contact.username})` }"
               class="w-[38px] h-[38px] rounded-full bg-cover bg-center"
             ></div>
           </button>

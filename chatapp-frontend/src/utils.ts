@@ -41,12 +41,12 @@ export const getOddContact = (conversation: IConversation) => {
  * @returns A string representing the url to the avatar image
  */
 export const getAvatar = (conversation: IConversation) => {
-  // if (["GROUP", "BROADCAST"].includes(conversation.type)) {
-  //   return conversation?.avatar;
-  // } else {
-  //   let oddContact = getOddContact(conversation);
-  //   return oddContact?.avatar;
-  // }
+  if (["GROUP", "BROADCAST"].includes(conversation.type)) {
+    return `https://loremflickr.com/g/320/240/${conversation?.name}`;
+  } else {
+    let oddContact = getOddContact(conversation);
+    return `https://i.pravatar.cc/150?u=${oddContact?.username}`;
+  }
   return "avatar"
 };
 

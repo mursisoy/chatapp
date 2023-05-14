@@ -13,14 +13,14 @@ const props = defineProps<{
 <template>
   <div
     v-if="index === 0"
-    :style="{ backgroundImage: `url(${member.avatar})` }"
+    :style="{ backgroundImage: `url(https://i.pravatar.cc/150?u=${member.username})` }"
     class="rounded-full bg-cover bg-center"
     :class="props.large ? ['w-[100px]', 'h-[100px]'] : ['w-7', 'h-7']"
   ></div>
 
   <div
     v-else-if="props.membersLength === 2 && index === 1"
-    :style="{ backgroundImage: `url(${member.avatar})` }"
+    :style="{ backgroundImage: `url(https://i.pravatar.cc/150?u=${member.username})` }"
     class="absolute top-0 left-[20px] rounded-full bg-cover bg-center"
     :class="props.large ? ['w-[100px]', 'h-[100px]'] : ['w-7', 'h-7']"
   ></div>

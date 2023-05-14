@@ -57,7 +57,7 @@ const handleCloseOnClickOutside = (event: Event) => {
     >
       <div
         id="user-avatar"
-        :style="{ backgroundImage: `url(${store.user?.avatar})` }"
+        :style="{ backgroundImage: `url(https://i.pravatar.cc/150?u=${store.user?.username})` }"
         class="w-7 h-7 rounded-full bg-cover bg-center"
       ></div>
     </button>
