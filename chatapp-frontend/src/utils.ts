@@ -13,18 +13,7 @@ import useStore from "@src/store/store";
  * @returns A string the combines the first and last names.
  */
 export const getFullName = (contact: IContact) => {
-  return contact.firstName + " " + contact.lastName;
-};
-
-export const getUserAsContact = (user: IUser): IContact => {
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    avatar: "",
-    lastSeen: new Date()
-  }
+  return contact.username;
 };
 
 /**
@@ -38,7 +27,7 @@ export const getOddContact = (conversation: IConversation) => {
   let oddContact;
 
   for (let contact of conversation.contacts) {
-    if (store.user && contact.id !== store.user.id) {
+    if (store.user && contact.username !== store.user.username) {
       oddContact = contact;
     }
   }
@@ -52,12 +41,13 @@ export const getOddContact = (conversation: IConversation) => {
  * @returns A string representing the url to the avatar image
  */
 export const getAvatar = (conversation: IConversation) => {
-  if (["group", "broadcast"].includes(conversation.type)) {
-    return conversation?.avatar;
-  } else {
-    let oddContact = getOddContact(conversation);
-    return oddContact?.avatar;
-  }
+  // if (["GROUP", "BROADCAST"].includes(conversation.type)) {
+  //   return conversation?.avatar;
+  // } else {
+  //   let oddContact = getOddContact(conversation);
+  //   return oddContact?.avatar;
+  // }
+  return "avatar"
 };
 
 /**
@@ -66,7 +56,7 @@ export const getAvatar = (conversation: IConversation) => {
  * @returns String
  */
 export const getName = (conversation: IConversation) => {
-  if (["group", "broadcast"].includes(conversation.type)) {
+  if (["GROUP", "BROADCAST"].includes(conversation.type)) {
     return conversation?.name;
   } else {
     let oddContact = getOddContact(conversation);
@@ -148,7 +138,7 @@ export const getOtherMembers = (call: ICall) => {
 
   if (call) {
     for (let member of call.members) {
-      if (store.user && member.id !== store.user.id) {
+      if (store.user && member.username !== store.user.username) {
         members.push(member);
       }
     }

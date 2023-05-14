@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import useStore from "@src/store/store";
 import {useUserStore} from "@src/store/user";
-
+import useSocketStore from "@src/store/socket";
 import {
   ArrowLeftOnRectangleIcon,
   ArrowPathIcon,
@@ -21,8 +21,9 @@ const props = defineProps<{
 
 const store = useStore();
 const authStore = useUserStore();
-
+const socketStore = useSocketStore();
 const logout = async () => {
+  socketStore.close({force: true})
   await authStore.logout();
 }
 

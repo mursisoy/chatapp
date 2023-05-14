@@ -22,7 +22,7 @@ const selectedContacts: Ref<IContact[]> = ref([]);
 const isContactSelected = (contact: IContact) => {
   if (contact) {
     return Boolean(
-      selectedContacts.value.find((item) => item.id === contact.id)
+      selectedContacts.value.find((item) => item.username === contact.username)
     );
   } else {
     return false;
@@ -32,7 +32,7 @@ const isContactSelected = (contact: IContact) => {
 // (event) change the value of selected contacts
 const handleSelectedContactsChange = (contact: IContact) => {
   let contactIndex = selectedContacts.value.findIndex(
-    (item) => item.id === contact.id
+    (item) => item.username === contact.username
   );
   if (contactIndex !== -1) {
     selectedContacts.value.splice(contactIndex, 1);

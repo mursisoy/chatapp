@@ -23,7 +23,7 @@ const attachmentMessages = computed(() => {
   for (let message of props.conversation.messages) {
     if (hasAttachments(message)) {
       if (props.contact) {
-        if (message.sender.id === props.contact.id) {
+        if (message.sender.username === props.contact.username) {
           media.push(message);
         }
       } else {

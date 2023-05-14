@@ -58,9 +58,9 @@ const store = useStore();
           >
             <Typography variant="heading-2">
               {{
-                store.user && store.user.id === props.contact.id
-                  ? "You"
-                  : getFullName(props.contact)
+                store.user && store.user?.username === props.contact.username
+                    ? "You"
+                    : getFullName(props.contact)
               }}
             </Typography>
 

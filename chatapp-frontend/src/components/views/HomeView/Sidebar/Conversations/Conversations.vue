@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IConversation } from "@src/types";
 import type { Ref } from "vue";
-import { onMounted, ref, watch } from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 
 import useStore from "@src/store/store";
 import { getName } from "@src/utils";
@@ -27,7 +27,9 @@ const composeOpen = ref(false);
 const openArchive = ref(false);
 
 // the filtered list of conversations.
-const filteredConversations: Ref<IConversation[]> = ref(store.conversations);
+const filteredConversations: Ref<IConversation[]> = computed(()=>
+    store.conversations
+);
 
 // filter the list of conversation based on search text.
 watch([keyword, openArchive], () => {

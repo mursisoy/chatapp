@@ -25,15 +25,15 @@ const isFollowUp = (index: number, previousIndex: number): boolean => {
   if (previousIndex < 0) {
     return false;
   } else {
-    let previousSender = activeConversation.messages[previousIndex].sender.id;
-    let currentSender = activeConversation.messages[index].sender.id;
+    let previousSender = activeConversation.messages[previousIndex].from;
+    let currentSender = activeConversation.messages[index].from;
     return previousSender === currentSender;
   }
 };
 
 // checks whether the message is sent by the authenticated user.
 const isSelf = (message: IMessage): boolean => {
-  return Boolean(store.user && message.sender.id === store.user.id);
+  return Boolean(store.user && message.from === store.user.id);
 };
 
 // checks wether the new message has been sent in a new day or not.

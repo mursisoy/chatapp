@@ -1,21 +1,17 @@
+import {ULID} from "ulid";
+
 export interface IUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar: string;
-  lastSeen: Date;
+  username: string;
+
+  id: string,
   role: string,
-  contacts: IContact[];
+  // contacts: IContact[];
 }
 
 export interface IContact {
-  id: string;
-  firstName: string;
-  lastName: string;
-  avatar: string;
-  email: string;
-  lastSeen: Date;
+  username: string;
+  avatar?: string;
+
 }
 
 export interface IPreviewData {
@@ -49,7 +45,8 @@ export interface IMessage {
   type?: string;
   content?: string | IRecording;
   date: number;
-  sender: IContact;
+  from: string;
+  to: string;
   replyTo?: string;
   previewData?: IPreviewData;
   attachments?: IAttachment[];
@@ -111,20 +108,17 @@ export interface IEmoji {
 }
 
 export interface IUserSignUp {
-  email: string;
-  name: string;
-  lastname: string;
+  username: string;
   password: string;
   passwordConfirmation: string;
 }
 
 export interface IUserLogin {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface IEnvelope {
-  id: string,
   from: string,
   to: string,
   type?: string;

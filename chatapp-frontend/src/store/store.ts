@@ -13,7 +13,10 @@ import type {
   ICall,
   ISettings,
   IEmoji,
+  IContact
 } from "@src/types";
+import {fetchWrapper} from "@src/helpers/fetchWrapper";
+import {getConversationIndex} from "@src/utils";
 
 const useStore = defineStore("chat", () => {
 
@@ -52,42 +55,82 @@ const useStore = defineStore("chat", () => {
   const callMinimized = ref(false);
   const openVoiceCall = ref(false);
 
+  const contacts: Ref<IContact[] | undefined > = ref( undefined)
+
   // contacts grouped alphabetically.
   const contactGroups: Ref<IContactGroup[] | undefined> = computed(() => {
-    if (user.value) {
-      let sortedContacts = [...user.value.contacts];
+      if (contacts.value != undefined) {
+        let sortedContacts = contacts.value ;
+        sortedContacts.sort();
 
-      sortedContacts.sort();
+        let groups: IContactGroup[] = [];
+        let currentLetter: string = "";
+        let groupNames: string[] = [];
 
-      let groups: IContactGroup[] = [];
-      let currentLetter: string = "";
-      let groupNames: string[] = [];
-
-      // create an array of letter for every different sort level.
-      for (let contact of sortedContacts) {
-        // if the first letter is different create a new group.
-        if (contact.firstName[0].toUpperCase() !== currentLetter) {
-          currentLetter = contact.firstName[0].toUpperCase();
-          groupNames.push(currentLetter);
-        }
-      }
-
-      // create an array that groups contact names based on the first letter;
-      for (let groupName of groupNames) {
-        let group: IContactGroup = { letter: groupName, contacts: [] };
+        // create an array of letter for every different sort level.
         for (let contact of sortedContacts) {
-          if (contact.firstName[0].toUpperCase() === groupName) {
-            group.contacts.push(contact);
+          // if the first letter is different create a new group.
+          if (contact.username[0].toUpperCase() !== currentLetter) {
+            currentLetter = contact.username[0].toUpperCase();
+            groupNames.push(currentLetter);
           }
         }
-        groups.push(group);
-      }
 
-      return groups;
-    }
+        // create an array that groups contact names based on the first letter;
+        for (let groupName of groupNames) {
+          let group: IContactGroup = {letter: groupName, contacts: []};
+          for (let contact of sortedContacts) {
+            if (contact.username[0].toUpperCase() === groupName) {
+              group.contacts.push(contact);
+            }
+          }
+          groups.push(group);
+        }
+        return groups;
+      }
   });
 
   const getStatus = computed(() => status);
+
+  async function createConversation(conversationRequest: any) {
+    return fetchWrapper.post(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations`,
+        conversationRequest
+    )
+  }
+  // async getContacts(): Promise<IContact[]> {
+  //   const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/contacts`)
+  //   return res.contacts
+  // }
+  async function updateContacts() {
+    const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/contacts`)
+    contacts.value = res.contacts
+    return res.contacts
+  }
+
+  async function updateConversations() {
+    const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations`)
+    console.debug("Conversations updated")
+    res.conversations?.forEach( (conversation) => {
+      const index = getConversationIndex(conversation.id);
+      if (index == null) {
+        conversations.value.push(conversation)
+      } else {
+        conversations.value[index] = {...conversations.value[index] ,...conversation}
+      }
+    })
+    return res.conversations
+  }
+
+  async function updateConversation(conversationId: string) {
+    const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}`)
+    const conversation: IConversation = res.conversations[0]
+    const index = getConversationIndex(conversation.id);
+    if (index == null) {
+      conversations.value.push(conversation)
+    } else {
+      conversations.value[index] = {...conversations.value[index] ,...conversation}
+    }
+  }
 
   return {
     // status refs
@@ -96,6 +139,7 @@ const useStore = defineStore("chat", () => {
 
     // data refs
     user,
+    contacts,
     conversations,
     contactGroups,
     notifications,
@@ -113,6 +157,12 @@ const useStore = defineStore("chat", () => {
     conversationOpen,
     callMinimized,
     openVoiceCall,
+
+    // functions
+    createConversation,
+    updateContacts,
+    updateConversations,
+    updateConversation
   };
 });
 

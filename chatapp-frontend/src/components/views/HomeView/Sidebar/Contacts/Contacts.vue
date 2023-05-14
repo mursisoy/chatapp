@@ -2,7 +2,7 @@
 import { UserPlusIcon } from "@heroicons/vue/24/outline";
 import type { IContactGroup, IUser } from "@src/types";
 import type { Ref } from "vue";
-import { ref, watch } from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 
 import useStore from "@src/store/store";
 
@@ -24,7 +24,7 @@ const openModal = ref(false);
 const contactContainer: Ref<HTMLElement | null> = ref(null);
 
 // contact groups filtered by search text
-const filteredContactGroups: Ref<IContactGroup[] | undefined> = ref(
+const filteredContactGroups: Ref<IContactGroup[] | undefined> = computed(()=>
   store.contactGroups
 );
 
@@ -36,13 +36,7 @@ watch(searchText, () => {
 
       newGroup.contacts = newGroup.contacts.filter((contact) => {
         if (
-          contact.firstName
-            .toLowerCase()
-            .includes(searchText.value.toLowerCase())
-        )
-          return true;
-        else if (
-          contact.lastName
+          contact.username
             .toLowerCase()
             .includes(searchText.value.toLowerCase())
         )
@@ -53,6 +47,8 @@ watch(searchText, () => {
     })
     .filter((group) => group.contacts.length > 0);
 });
+onMounted(()=>{
+})
 </script>
 
 <template>
@@ -62,18 +58,18 @@ watch(searchText, () => {
       <template v-slot:title>Contacts</template>
 
       <!--side actions-->
-      <template v-slot:actions>
-        <IconButton
-          @click="openModal = true"
-          class="w-7 h-7"
-          title="add contacts"
-          aria-label="add contacts"
-        >
-          <UserPlusIcon
-            class="w-[20px] h-[20px] text-indigo-300 hover:text-indigo-400"
-          />
-        </IconButton>
-      </template>
+<!--      <template v-slot:actions>-->
+<!--        <IconButton-->
+<!--          @click="openModal = true"-->
+<!--          class="w-7 h-7"-->
+<!--          title="add contacts"-->
+<!--          aria-label="add contacts"-->
+<!--        >-->
+<!--          <UserPlusIcon-->
+<!--            class="w-[20px] h-[20px] text-indigo-300 hover:text-indigo-400"-->
+<!--          />-->
+<!--        </IconButton>-->
+<!--      </template>-->
     </SidebarHeader>
 
     <!--search-->
@@ -96,8 +92,7 @@ watch(searchText, () => {
         v-else-if="
           store.status === 'success' &&
           !store.delayLoading &&
-          store.user &&
-          store.user.contacts.length > 0
+          store.contacts?.length > 0
         "
         :contactGroups="filteredContactGroups"
         :bottom-edge="(contactContainer as HTMLElement)?.getBoundingClientRect().bottom"

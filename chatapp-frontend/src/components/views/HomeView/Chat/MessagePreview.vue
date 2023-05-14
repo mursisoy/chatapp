@@ -20,7 +20,7 @@ const store = useStore();
     class="border-l-2 pl-3 cursor-pointer outline-none border-opacity-50 duration-200"
     :class="['border-gray-900', 'dark:border-white', 'dark:border-opacity-50']"
     tabindex="0"
-    :aria-label="'reply to: ' + getFullName(props.message.sender)"
+    :aria-label="'reply to: ' + getFullName(props.message.from)"
   >
     <!--name-->
     <p
@@ -33,9 +33,9 @@ const store = useStore();
       ]"
     >
       {{
-        store.user && message.sender.id !== store.user.id
-          ? getFullName(props.message.sender)
-          : "You"
+        store.user && message.from.username !== store.user.id
+            ? getFullName(props.message.from)
+            : "You"
       }}
     </p>
 

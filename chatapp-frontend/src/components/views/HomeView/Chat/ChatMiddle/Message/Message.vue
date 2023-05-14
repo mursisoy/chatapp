@@ -90,11 +90,11 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
       <div class="mr-4" :class="{ 'ml-[36px]': props.followUp && !divider }">
         <div
           v-if="!hideAvatar()"
-          :aria-label="getFullName(props.message.sender)"
+          :aria-label="getFullName(props.message.from)"
           class="outline-none"
         >
           <div
-            :style="{ backgroundImage: `url(${props.message.sender.avatar})` }"
+            :style="{ backgroundImage: `url(${props.message.from.avatar})` }"
             class="w-[36px] h-[36px] bg-cover bg-center rounded-full"
           ></div>
         </div>
@@ -144,16 +144,16 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
           </Typography>
 
           <!--recording-->
-          <div
-            v-else-if="
-              props.message.content && props.message.type === 'recording'
-            "
-          >
-            <Recording
-              :recording="(props.message.content as IRecording)"
-              :self="props.self"
-            />
-          </div>
+<!--          <div-->
+<!--            v-else-if="-->
+<!--              props.message.content && props.message.type === 'recording'-->
+<!--            "-->
+<!--          >-->
+<!--            <Recording-->
+<!--              :recording="(props.message.content as IRecording)"-->
+<!--              :self="props.self"-->
+<!--            />-->
+<!--          </div>-->
 
           <!--attachments-->
           <Attachments
@@ -179,7 +179,7 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
         </div>
 
         <!--read receipt-->
-        <Receipt v-if="props.self" :state="props.message.state" />
+<!--        <Receipt v-if="props.self" :state="props.message.state" />-->
       </div>
     </div>
     <MessageContextMenu

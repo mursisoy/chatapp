@@ -72,7 +72,7 @@ const handleRemovePinnedMessage = () => {
           class="group w-7 h-7 text-gray-300"
           :class="{
             'mr-3':
-              store.user && activeConversation?.admins?.includes(store.user.id),
+              store.user && activeConversation?.admins?.includes(store.user.username),
           }"
         >
           <EyeSlashIcon class="w-[16px] h-[16px]" />
@@ -81,7 +81,7 @@ const handleRemovePinnedMessage = () => {
         <!--remove pinned Message-->
         <IconButton
           v-if="
-            store.user && activeConversation?.admins?.includes(store.user.id)
+            store.user && activeConversation?.admins?.includes(store.user.username)
           "
           @click="handleRemovePinnedMessage"
           class="group w-7 h-7"

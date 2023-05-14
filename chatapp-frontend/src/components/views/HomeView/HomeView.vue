@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import {Client, IMessage} from "@stomp/stompjs";
+import {Client, IFrame, IMessage as StompMessage} from "@stomp/stompjs";
 
 import useStore from "@src/store/store";
 import {useUserStore} from "@src/store/user";
@@ -11,6 +11,9 @@ import Sidebar from "@src/components/views/HomeView/Sidebar/Sidebar.vue";
 import NoChatSelected from "@src/components/states/empty-states/NoChatSelected.vue";
 import Loading3 from "@src/components/states/loading-states/Loading3.vue";
 import FadeTransition from "@src/components/ui/transitions/FadeTransition.vue";
+import router from "@src/router";
+import {getConversationIndex} from "@src/utils";
+import {IMessage} from "@src/types";
 
 const store = useStore();
 const authStore = useUserStore();
@@ -27,24 +30,47 @@ const activeChatComponent = computed(() => {
   }
 });
 
-function onMessageReceived(message: IMessage) {
+function onMessageReceived(message: StompMessage) {
+  if (message.body) {
+    const conversationMessage: IMessage = JSON.parse(message.body)
+    const index = getConversationIndex(conversationMessage.to);
+    if (index !== undefined) {
+      if (store.conversations[index].messages == undefined) {
+        store.conversations[index].messages = []
+      }
+      store.conversations[index].messages.push(conversationMessage)
+    } else {
+
+    }
+  }
   console.log(message)
 }
 
+function onError(message: IFrame) {
+  console.error("Socket error: ", message)
+  socketStore.close({force: true})
+  authStore.logout()
+  router.push('/access/sign-in')
+}
+
 onMounted(() => {
+
   store.status = "loading";
   setTimeout(() => {
     store.delayLoading = false;
   });
-
+  Promise.all([
+    store.updateContacts(),
+    store.updateConversations()
+  ]).then(()=>{
+    store.status = 'success'
+  })
   store.$patch({
-    status: "success",
     user: authStore.user,
-    // conversations: request.data.conversations,
     // notifications: request.data.notifications,
     // archivedConversations: request.data.archivedConversations,
   });
-  socketStore.init(onMessageReceived);
+  socketStore.init(onMessageReceived, onError);
 })
 </script>
 

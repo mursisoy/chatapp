@@ -71,7 +71,7 @@ const handleSelectConversation = () => {
 
 // last message in conversation to display
 const lastMessage = computed(
-  () => props.conversation.messages[props.conversation.messages.length - 1]
+  () => props.conversation.messages?.slice(-1)
 );
 
 // (event) remove the unread indicator when opening the conversation

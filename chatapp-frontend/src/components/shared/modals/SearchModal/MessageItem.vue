@@ -15,7 +15,7 @@ const props = defineProps<{
     <!--profile image-->
     <div class="mr-4">
       <div
-        :style="{ backgroundImage: `url(${props.message.sender.avatar})` }"
+        :style="{ backgroundImage: `url(${props.message.from.avatar})` }"
         class="w-7 h-7 rounded-full bg-cover bg-center"
       ></div>
     </div>
@@ -24,7 +24,7 @@ const props = defineProps<{
     <div class="grow">
       <div class="flex flex-col items-start">
         <Typography variant="heading-2" class="mb-4">
-          {{ getFullName(props.message.sender) }}
+          {{ getFullName(props.message.from) }}
         </Typography>
 
         <Typography variant="body-2"> Wow really cool </Typography>

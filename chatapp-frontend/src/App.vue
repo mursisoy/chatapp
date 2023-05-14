@@ -31,6 +31,7 @@ const store = useStore();
 
 // update localStorage with state changes
 store.$subscribe((_mutation, state) => {
+  console.log("Store updated")
   localStorage.setItem("chat", JSON.stringify(state));
 });
 

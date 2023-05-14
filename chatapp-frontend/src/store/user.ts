@@ -22,9 +22,7 @@ interface CsrfTokenResponse {
 
 interface IDecodedJwt extends JwtPayload{
     username: string,
-    email: string,
-    firstName: string,
-    lastName: string,
+    id: string,
     role: string
 }
 export const useUserStore = defineStore("auth", {
@@ -35,19 +33,14 @@ export const useUserStore = defineStore("auth", {
     actions: {
         async updateStore(token: TokenResponse) {
             this.token = token
+
             let decoded_jwt : IDecodedJwt= jwt_decode(<string>this.token?.accessToken)
-            console.log(decoded_jwt)
+
             this.user = {
-                id: decoded_jwt.username,
-                firstName: decoded_jwt.firstName,
-                lastName: decoded_jwt.lastName,
-                email: decoded_jwt.email,
-                role: decoded_jwt.role,
-                avatar: "",
-                lastSeen: new Date(),
-                contacts: await this.getContacts()
+                id: decoded_jwt.id,
+                username: decoded_jwt.username,
+                role: decoded_jwt.role
             }
-            this.user!.contacts = await this.getContacts()
             localStorage.setItem('token', JSON.stringify(this.token))
             localStorage.setItem('user', JSON.stringify(this.user))
         },
@@ -79,9 +72,6 @@ export const useUserStore = defineStore("auth", {
             localStorage.removeItem('token')
             localStorage.removeItem('chat')
         },
-        async getContacts(): Promise<IContact[]> {
-            const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/contacts`)
-            return res.contacts
-        }
+
     },
 });
