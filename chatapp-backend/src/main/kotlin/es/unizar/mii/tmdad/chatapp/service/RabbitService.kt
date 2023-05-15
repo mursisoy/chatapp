@@ -2,12 +2,14 @@ package es.unizar.mii.tmdad.chatapp.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rabbitmq.client.Channel
+import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.http.client.Client
 import es.unizar.mii.tmdad.chatapp.dao.ChatMessage
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -18,7 +20,8 @@ class RabbitService (private val channel: Channel,
     private val rns: RabbitNamingService){
     private val logger = LoggerFactory.getLogger(javaClass)
 
-
+    @Value("\${spring.rabbitmq-amqp.vhost}")
+    private val vhost: String? = ConnectionFactory.DEFAULT_VHOST
 
     fun registRabbit(userId: UUID ){
         val exchangeName= rns.getUserExchangeName(userId)
@@ -80,7 +83,7 @@ class RabbitService (private val channel: Channel,
 
     fun addConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
+        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
         if (userId == UUID.fromString("${exchArgs["admin"]}")) {
             if (ChatRoomType.valueOf("${exchArgs["type"]}") == ChatRoomType.GROUP) {
@@ -97,7 +100,7 @@ class RabbitService (private val channel: Channel,
 
     fun deleteConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
+        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
         if (userId == UUID.fromString("${exchArgs["admin"]}")) {
             if (exchArgs["type"] == ChatRoomType.GROUP) {
@@ -118,7 +121,7 @@ class RabbitService (private val channel: Channel,
 
     fun deleteChat(userId: UUID, conversationId: UUID,){
         //obtenecion de los argumentos del exchange de sala
-        val exchange= cliente.getExchange("/", rns.getConversationExchangeName(conversationId))
+        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
         val exchArgs=exchange.arguments
         if (userId == UUID.fromString("${exchArgs["admin"]}")) {
             if (exchArgs["type"] == ChatRoomType.GROUP) {
