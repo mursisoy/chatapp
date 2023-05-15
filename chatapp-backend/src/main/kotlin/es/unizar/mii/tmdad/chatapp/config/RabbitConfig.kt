@@ -3,7 +3,6 @@ package es.unizar.mii.tmdad.chatapp.config
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.ConnectionFactory
 import com.rabbitmq.http.client.Client
-import com.rabbitmq.http.client.ClientParameters
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.service.ChatRoomService
@@ -28,11 +27,13 @@ class RabbitConfig (
         //factory.setUsername(userName) -> guest
         //factory.setPassword(password) -> guest
         //factory.setVirtualHost(virtualHost) -> /
-        factory.username = "guest"
-        factory.password = "guest"
-        factory.host = "rabbitmq" //-> localhost
+        //factory.username = "guest"
+        //factory.password = "guest"
+        //factory.host = "rabbitmq" //-> localhost
         //factory.setPort(portNumber) -> 5672
         factory.isAutomaticRecoveryEnabled = true
+        factory.setUri("amqps://zhscdaby:iqbwJ92kaHjF7QjpvM2zfP5Lh50zF9GX@rat.rmq2.cloudamqp.com/zhscdaby")
+
 
 
         while (true) {
@@ -77,12 +78,7 @@ class RabbitConfig (
 
         while (true) {
             try {
-                val cliente = Client(
-                    ClientParameters()
-                        .url("http://rabbitmq:15672/api/")
-                        .username("guest")
-                        .password("guest")
-                )
+                val cliente = Client("https://zhscdaby:iqbwJ92kaHjF7QjpvM2zfP5Lh50zF9GX@rat.rmq2.cloudamqp.com/api")
 
                 return cliente
             } catch (e: ConnectException) {
