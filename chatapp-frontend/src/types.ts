@@ -118,6 +118,11 @@ export interface IUserLogin {
   password: string;
 }
 
+export interface ICreateGroup {
+  name: string;
+  contacts: String[]
+}
+
 export interface IEnvelope {
   from: string,
   to: string,

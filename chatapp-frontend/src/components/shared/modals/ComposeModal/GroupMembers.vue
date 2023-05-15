@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import type { Ref } from "vue";
 import type { IContact, IUser } from "@src/types";
 
@@ -12,11 +12,21 @@ import Button from "@src/components/ui/inputs/Button.vue";
 import Typography from "@src/components/ui/data-display/Typography.vue";
 import Checkbox from "@src/components/ui/inputs/Checkbox.vue";
 import ScrollBox from "@src/components/ui/utils/ScrollBox.vue";
+import {ICreateGroup} from "@src/types";
 
 const store = useStore();
 
+const props = defineProps<{
+  modelValue: ICreateGroup
+}>()
+const emit = defineEmits(['update:modelValue','activePageChange']);
+
 // a list of contacts selected to make a call
 const selectedContacts: Ref<IContact[]> = ref([]);
+
+const filteredContacts = computed(() => {
+  return store.contacts?.filter(contact => contact.username != store.user?.username)
+})
 
 // checks whether a contact is selected or not
 const isContactSelected = (contact: IContact) => {
@@ -36,8 +46,10 @@ const handleSelectedContactsChange = (contact: IContact) => {
   );
   if (contactIndex !== -1) {
     selectedContacts.value.splice(contactIndex, 1);
+    props.modelValue.contacts.splice(contactIndex, 1);
   } else {
     selectedContacts.value.push(contact);
+    props.modelValue.contacts.push(contact.username);
   }
 };
 </script>
@@ -53,7 +65,7 @@ const handleSelectedContactsChange = (contact: IContact) => {
     <ScrollBox class="overflow-y-scroll max-h-[200px] mb-5">
       <ContactItem
         v-if="store.status === 'success' && !store.delayLoading"
-        v-for="(contact, index) in store.contacts"
+        v-for="(contact, index) in filteredContacts"
         :contact="contact"
         @click="handleSelectedContactsChange(contact)"
         :active="isContactSelected(contact)"
@@ -80,6 +92,7 @@ const handleSelectedContactsChange = (contact: IContact) => {
             animationName: 'slide-right',
           })
         "
+        type="submit"
         variant="ghost"
         class="px-5 mr-4"
       >
@@ -88,6 +101,7 @@ const handleSelectedContactsChange = (contact: IContact) => {
 
       <!--next button-->
       <Button
+          type="submit"
         class="px-5 bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-500"
       >
         Finish
