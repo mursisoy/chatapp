@@ -9,6 +9,7 @@ import ScrollBox from "@src/components/ui/utils/ScrollBox.vue";
 import useSocketStore from "@src/store/socket";
 import {IContact, IConversation, IMessage} from "@src/types";
 import {useUserStore} from "@src/store/user";
+import {computed} from "vue";
 
 const emit = defineEmits(['goToConversation'])
 
@@ -17,8 +18,10 @@ const userStore = useUserStore();
 
 const socketStore = useSocketStore();
 
+const filteredContacts = computed(() => {
+  return store.contacts?.filter(contact => contact.username != store.user?.username)
+})
 function contactSelected(contact: IContact){
-  console.debug(contact)
   if (store.user != undefined) {
     store.createConversation(
         {
@@ -60,7 +63,7 @@ function contactSelected(contact: IContact){
           !store.delayLoading &&
           store.contacts?.length > 0
         "
-        v-for="(contact, index) in store.contacts"
+        v-for="(contact, index) in filteredContacts"
         :key="index"
         :contact="contact"
         @contact-selected="contactSelected"
