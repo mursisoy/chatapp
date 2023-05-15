@@ -19,7 +19,7 @@
 //        while (true) {
 //            try {
 //                val cliente= MinioClient.builder()
-//                        .endpoint(minioUrl, 9000, false)
+//                        .endpoint(minioUrl)
 //                        .credentials(accessKey, accessSecret)
 //                        .build()
 //                return cliente
