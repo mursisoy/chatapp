@@ -44,9 +44,7 @@ const signUp = async () => {
   await router.push('/')
 }
 const userSignupFormData = ref<IUserSignUp>({
-  email: "",
-  name: "",
-  lastname: "",
+  username: "",
   password: "",
   passwordConfirmation: ""
 });
