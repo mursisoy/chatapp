@@ -124,7 +124,9 @@ class ChatController(
         val contactSet = chatRoomRequest.contacts.toSet()
         val contacts = contactSet.map { userService.loadUserByUsername(it).id }.toSet()
 
-        if (chatRoomRequest.type == ChatRoomType.COUPLE) {
+        if (chatRoomRequest.type == ChatRoomType.BROADCAST) {
+            return ResponseEntity.badRequest().build()
+        } else if (chatRoomRequest.type == ChatRoomType.COUPLE) {
             if (contacts.size != 2) {
                 return ResponseEntity.unprocessableEntity().build()
             }
@@ -256,7 +258,7 @@ class ChatController(
     ): ResponseEntity<String> {
         val loggedInUser = authentication.principal as UserEntity
         return if ( rabbitManageService.authorizeSendToGroup(conversationId, loggedInUser.id.toString()) ) {
-            minioService.uploadFile(conversationId, file)
+//            minioService.uploadFile(conversationId, file)
             return ResponseEntity.ok().build()
         } else {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
