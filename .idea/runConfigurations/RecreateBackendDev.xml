@@ -3,13 +3,18 @@
     <deployment type="docker-compose.yml">
       <settings>
         <option name="envFilePath" value="" />
+        <option name="secondarySourceFiles">
+          <list>
+            <option value="docker-compose-debug.generated.override.yml" />
+          </list>
+        </option>
         <option name="services">
           <list>
             <option value="backend" />
-            <option value="db" />
           </list>
         </option>
         <option name="sourceFilePath" value="docker-compose-debug.yml" />
+        <option name="upAlwaysRecreate" value="true" />
         <option name="upForceRecreate" value="true" />
         <option name="upRenewAnonVolumes" value="true" />
       </settings>
