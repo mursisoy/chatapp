@@ -138,6 +138,17 @@ const useStore = defineStore("chat", () => {
     }
   }
 
+  async function deleteConversation(conversationId: string) {
+    const index = getConversationIndex(conversationId);
+    const res: Response = await fetchWrapper.delete(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}`)
+    console.debug(res)
+    if ( res.status == 200) {
+      if (index != null) {
+        delete conversations.value[index]
+      }
+    }
+  }
+
   async function downloadFile(conversationId: string, fileId: string) {
     return fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversation/${conversationId}/files/${fileId}`)
   }
@@ -174,7 +185,8 @@ const useStore = defineStore("chat", () => {
     updateConversations,
     updateConversation,
     uploadFile,
-    downloadFile
+    downloadFile,
+    deleteConversation
   };
 });
 

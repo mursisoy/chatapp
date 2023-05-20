@@ -55,6 +55,13 @@ const handleCloseContextMenu = () => {
   showContextMenu.value = false;
 };
 
+const deleteConversation = () => {
+  store.deleteConversation(props.conversation.id)
+      .then(result => console.debug(result))
+      .catch(err => console.error(err))
+  handleCloseContextMenu()
+}
+
 // (event) close context menu when opening a new one.
 const contextConfig = {
   handler: handleCloseContextMenu,
@@ -220,7 +227,7 @@ const handleRemoveUnread = () => {
         Archive conversation
       </DropdownLink>
 
-      <DropdownLink :handle-click="handleCloseContextMenu" color="danger">
+      <DropdownLink :handle-click="deleteConversation" color="danger">
         <TrashIcon class="h-5 w-5 mr-3" />
         Delete conversation
       </DropdownLink>
