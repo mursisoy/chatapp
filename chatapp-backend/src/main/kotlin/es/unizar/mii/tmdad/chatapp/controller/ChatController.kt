@@ -48,6 +48,7 @@ class ChatController(
     fun getContacts(principal: Principal, authentication: Authentication): ResponseEntity<ContactListResponse> {
         val contactList = userService.getAllUsers().map {
             ContactInfoResponse(
+                id = it.id.toString(),
                 username = it.username,
             )
         }
@@ -60,20 +61,32 @@ class ChatController(
 
     @GetMapping("conversations")
     fun getConversations(
-        authentication: Authentication): ResponseEntity<ConversationListResponse> {
+        authentication: Authentication
+    ): ResponseEntity<ConversationListResponse> {
         val loggedInUser = authentication.principal as UserEntity
         val conversations = rabbitManageService.getConversationsForUser(loggedInUser)
         return ResponseEntity.ok(
             ConversationListResponse(
-                conversations = conversations.map{conversation ->
+                conversations = conversations.map { conversation ->
                     ConversationResponse(
                         id = "${conversation.id}",
                         name = conversation.name,
-                        contacts = conversation.contacts.map {
-                            ContactInfoResponse(
-                                userService.loadUserById(it).username
-                            )},
-                        owner = "${conversation.owner}",
+                        contacts = conversation.contacts.map { contactId ->
+                            userService.loadUserById(contactId).let {
+                                ContactInfoResponse(
+                                    username = it.username,
+                                    id = it.id.toString()
+                                )
+                            }
+                        },
+                        owner = conversation.owner?.let { owner ->
+                            userService.loadUserById(owner).let {
+                                ContactInfoResponse(
+                                    username = it.username,
+                                    id = it.id.toString()
+                                )
+                            }
+                        } ?: null,
                         type = conversation.type
                     )
                 }
@@ -85,7 +98,8 @@ class ChatController(
     @GetMapping("conversations/{conversationId}")
     fun getConversation(
         authentication: Authentication,
-        @PathVariable conversationId: UUID): ResponseEntity<ConversationListResponse> {
+        @PathVariable conversationId: UUID
+    ): ResponseEntity<ConversationListResponse> {
         try {
             val conversation = rabbitManageService.getConversationExchange(conversationId)
             return if (conversation != null) {
@@ -95,10 +109,22 @@ class ChatController(
                             ConversationResponse(
                                 id = "${conversation.id}",
                                 name = conversation.name,
-                                contacts = conversation.contacts.map { ContactInfoResponse(
-                                    userService.loadUserById(it).username
-                                ) },
-                                owner = "${conversation.owner}",
+                                contacts = conversation.contacts.map { contactId ->
+                                    userService.loadUserById(contactId).let {
+                                        ContactInfoResponse(
+                                            username = it.username,
+                                            id = it.id.toString()
+                                        )
+                                    }
+                                },
+                                owner = conversation.owner?.let { owner ->
+                                    userService.loadUserById(owner).let {
+                                        ContactInfoResponse(
+                                            username = it.username,
+                                            id = it.id.toString()
+                                        )
+                                    }
+                                } ?: null,
                                 type = conversation.type
                             )
                         )
@@ -107,11 +133,10 @@ class ChatController(
             } else {
                 ResponseEntity.notFound().build()
             }
-        } catch (e: IllegalArgumentException){
+        } catch (e: IllegalArgumentException) {
             return ResponseEntity.badRequest().build()
         }
     }
-
 
 
     @PostMapping("conversations")
@@ -123,7 +148,7 @@ class ChatController(
         var roomUUID: UUID = UUID.randomUUID()
         var owner: UUID? = loggedInUser.id
         val contactSet = chatRoomRequest.contacts.toSet()
-        val contacts = contactSet.map { userService.loadUserByUsername(it).id }.toSet()
+        val contacts = contactSet.map { userService.loadUserById(it) }.toSet()
 
         if (chatRoomRequest.type == ChatRoomType.BROADCAST) {
             return ResponseEntity.badRequest().build()
@@ -132,19 +157,19 @@ class ChatController(
                 return ResponseEntity.unprocessableEntity().build()
             }
             // Prevent users to create couple conversations with others
-            if (contacts.indexOf(loggedInUser.id) == -1) {
+            if (contactSet.indexOf(loggedInUser.id) == -1) {
                 return ResponseEntity.unprocessableEntity().build()
             }
             roomUUID = chatRoomService.coupleChatUUID(
-                contacts.elementAt(0),
-                contacts.elementAt(1)
+                contacts.elementAt(0).id,
+                contacts.elementAt(1).id
             )
             owner = null
         }
 
         val chatRoom = ChatRoom(
             id = roomUUID,
-            contacts = contacts,
+            contacts = contactSet,
             owner = owner,
             name = chatRoomRequest.name,
             type = chatRoomRequest.type.name
@@ -156,9 +181,19 @@ class ChatController(
         return ResponseEntity.ok(
             NewChatResponse(
                 id = chatRoom.id.toString(),
-                contacts = contactSet.map { ContactInfoResponse(username = it) },
+                contacts = contacts.map { ContactInfoResponse(
+                    id = it.id.toString(),
+                    username = it.username
+                ) },
                 type = chatRoom.type,
-                owner = chatRoom.owner.toString(),
+                owner = chatRoom.owner?.let { owner ->
+                    userService.loadUserById(owner).let {
+                        ContactInfoResponse(
+                            username = it.username,
+                            id = it.id.toString()
+                        )
+                    }
+                } ?: null,
                 name = chatRoom.name
             )
         )
@@ -168,7 +203,8 @@ class ChatController(
     fun deleteConversation(
         authentication: Authentication,
         @RequestBody infoDelete: DeleteChatRequest,
-        @PathVariable conversationId: UUID) {
+        @PathVariable conversationId: UUID
+    ) {
         val loggedInUser = authentication.principal as UserEntity
         rabbitService.deleteChat(loggedInUser.id, conversationId)
     }
@@ -207,19 +243,21 @@ class ChatController(
             from_id = loggedInUser.id,
             from = loggedInUser.username,
             to = conversationId,
-            content =  draftMessage.content,
+            content = draftMessage.content,
             media = draftMessage.media
         )
 
 
-        if ((   conversationId != rns.BROADCAST_QUEUE_ID &&
-                rabbitManageService.authorizeSendToGroup(
-                    rns.getConversationExchangeName(conversationId),
-                    rns.getUserExchangeName(loggedInUser.id) ) ||
-                ( conversationId == rns.BROADCAST_QUEUE_ID &&
-                  authentication.authorities.stream().anyMatch { a-> a.authority.equals("ADMIN")} )
+        if ((conversationId != rns.BROADCAST_QUEUE_ID &&
+                    rabbitManageService.authorizeSendToGroup(
+                        rns.getConversationExchangeName(conversationId),
+                        rns.getUserExchangeName(loggedInUser.id)
+                    ) ||
+                    (conversationId == rns.BROADCAST_QUEUE_ID &&
+                            authentication.authorities.stream().anyMatch { a -> a.authority.equals("ADMIN") })
 
-        )) {
+                    )
+        ) {
             // Use StompCommand.RECEIPT if SimpleStompBroker were compatible :(
 //            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE)
 //            headers.receiptId = receiptId
@@ -238,8 +276,10 @@ class ChatController(
 //                )
 //            }
         } else {
-            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE,
-                mapOf("status-code" to listOf("401")))
+            val headers = StompHeaderAccessor.create(
+                StompCommand.MESSAGE,
+                mapOf("status-code" to listOf("401"))
+            )
             headers.receiptId = receiptId
             simpMessageSendingOperations.convertAndSendToUser(
                 loggedInUser.username, "/queue/notifications",
@@ -258,15 +298,17 @@ class ChatController(
         @RequestParam("file") file: MultipartFile
     ): ResponseEntity<ConversationFileUploadResponse?> {
         val loggedInUser = authentication.principal as UserEntity
-        return if ( rabbitManageService.authorizeSendToGroup(
+        return if (rabbitManageService.authorizeSendToGroup(
                 rns.getConversationExchangeName(conversationId),
-                rns.getUserExchangeName(loggedInUser.id) ) ) {
+                rns.getUserExchangeName(loggedInUser.id)
+            )
+        ) {
             val fileId = minioService.uploadFile(file, conversationId.toString())
             if (fileId != null) {
                 ResponseEntity.ok(
                     ConversationFileUploadResponse(
                         id = fileId,
-                        name= file.originalFilename,
+                        name = file.originalFilename,
                         size = file.size,
                         type = file.contentType
                     )
@@ -287,9 +329,11 @@ class ChatController(
         @PathVariable fileId: UUID
     ): ResponseEntity<ByteArray> {
         val loggedInUser = authentication.principal as UserEntity
-        return if ( rabbitManageService.authorizeSendToGroup(
+        return if (rabbitManageService.authorizeSendToGroup(
                 rns.getConversationExchangeName(conversationId),
-                rns.getUserExchangeName(loggedInUser.id) ) ) {
+                rns.getUserExchangeName(loggedInUser.id)
+            )
+        ) {
             try {
 
                 val statObject = minioService.statFile(conversationId.toString(), fileId.toString())
@@ -298,19 +342,25 @@ class ChatController(
 
                 val response = ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                if (filename != null ) {
+                if (filename != null) {
                     response.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
                 }
-                response.body(IOUtils.toByteArray(minioService.downloadFile(conversationId.toString(), fileId.toString())))
-            } catch (e: Exception){
+                response.body(
+                    IOUtils.toByteArray(
+                        minioService.downloadFile(
+                            conversationId.toString(),
+                            fileId.toString()
+                        )
+                    )
+                )
+            } catch (e: Exception) {
                 logger.debug(e.stackTraceToString())
                 ResponseEntity.status(HttpStatus.FORBIDDEN).build()
             }
-        } else{
+        } else {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
-
 
 
 }

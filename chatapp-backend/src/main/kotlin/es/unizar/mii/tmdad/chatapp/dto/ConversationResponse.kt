@@ -2,7 +2,7 @@ package es.unizar.mii.tmdad.chatapp.dto
 
 data class ConversationResponse (
     val id: String,
-    val owner: String,
+    val owner: ContactInfoResponse?,
     val name: String?,
     val type: String,
     val contacts: List<ContactInfoResponse>

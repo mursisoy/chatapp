@@ -5,7 +5,7 @@ class NewChatResponse (
     val type: String,
     val contacts: List<ContactInfoResponse>,
     val name: String?,
-    val owner: String,
+    val owner: ContactInfoResponse?,
 ){
     override fun toString(): String {
         return "{type: ${type}, contacts: [${contacts.joinToString(",")}]}"
