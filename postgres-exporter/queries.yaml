@@ -1,5 +1,101 @@
-tendencies_now30_top10:
+tendencies_now30m_top10:
   query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '30 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 10"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now30m_top20:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '30 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 20"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now30m_top50:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '30 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 50"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1h_top10:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '60 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 10"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1h_top20:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '60 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 20"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1h_top50:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '60 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 50"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1d_top10:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '1440 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 10"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1d_top20:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '1440 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 20"
+  master: true
+  cache_seconds: 30
+  metrics:
+    - token:
+        usage: "LABEL"
+        description: "Token's word"
+    - freq:
+        usage: "GAUGE"
+        description: "Frequency"
+
+tendencies_now1d_top50:
+  query: "SELECT token, count(token) freq from (SELECT id,(ts_debug('spanish',content)).* from chat_message WHERE to_timestamp(date/1000) >= NOW() - interval '1440 minutes') t WHERE array_length(lexemes,1) IS NOT NULL group by t.alias, t.token order by freq desc limit 50"
   master: true
   cache_seconds: 30
   metrics:
