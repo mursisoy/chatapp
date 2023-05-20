@@ -14,19 +14,21 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class RabbitService (private val channel: Channel,
-                     private val rabbitManageService: RabbitManageService,
-                     private val cliente: Client,
-    private val rns: RabbitNamingService){
+class RabbitService(
+    private val channel: Channel,
+    private val rabbitManageService: RabbitManageService,
+    private val cliente: Client,
+    private val rns: RabbitNamingService
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Value("\${spring.rabbitmq-amqp.vhost}")
     private val vhost: String? = ConnectionFactory.DEFAULT_VHOST
 
-    fun registRabbit(userId: UUID ){
-        val exchangeName= rns.getUserExchangeName(userId)
-        val queueName= rns.getUserQueueName(userId)
-        val routingKey="*"
+    fun registRabbit(userId: UUID) {
+        val exchangeName = rns.getUserExchangeName(userId)
+        val queueName = rns.getUserQueueName(userId)
+        val routingKey = "*"
 
         channel.exchangeDeclare(exchangeName, "direct", true)
         channel.queueDeclare(queueName, true, false, false, null)
@@ -41,32 +43,33 @@ class RabbitService (private val channel: Channel,
     }
 
 
-    fun sendMessage(message: ChatMessage): Boolean{
+    fun sendMessage(message: ChatMessage): Boolean {
         val mapper = ObjectMapper()
         val conversationExchange = rns.getConversationExchangeName(message.to)
-        return if ( rabbitManageService.authorizeSendToGroup(
+        return if (rabbitManageService.authorizeSendToGroup(
                 conversationExchange,
                 rns.getUserExchangeName(message.from_id)
-            ) ) {
+            )
+        ) {
             channel.basicPublish(
                 conversationExchange,
                 "*",
                 null,
-                mapper.writeValueAsString(message).toByteArray())
+                mapper.writeValueAsString(message).toByteArray()
+            )
             true
         } else {
             false
         }
     }
 
-    fun createChat(chatRoom: ChatRoom){
+    fun createChat(chatRoom: ChatRoom) {
         //argumentos asociados al exchange de sala
-        val args=mutableMapOf<String, Any>()
-        if(chatRoom.contacts.size==2){
-            args["type"]=ChatRoomType.COUPLE.toString()
-        }
-        else{
-            args["type"]=ChatRoomType.GROUP.toString()
+        val args = mutableMapOf<String, Any>()
+        if (chatRoom.contacts.size == 2) {
+            args["type"] = ChatRoomType.COUPLE.toString()
+        } else {
+            args["type"] = ChatRoomType.GROUP.toString()
         }
 
         if (chatRoom.owner != null) {
@@ -86,10 +89,10 @@ class RabbitService (private val channel: Channel,
         }
     }
 
-    fun addConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
+    fun addConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>) {
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
-        val exchArgs=exchange.arguments
+        val exchange = cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
+        val exchArgs = exchange.arguments
         if (userId == UUID.fromString("${exchArgs["admin"]}")) {
             if (ChatRoomType.valueOf("${exchArgs["type"]}") == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
@@ -103,38 +106,51 @@ class RabbitService (private val channel: Channel,
         }
     }
 
-    fun deleteConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>){
+    fun deleteConversationContacts(userId: UUID, conversationId: UUID, usersAffected: Vector<UUID>) {
         //obtención de los argumentos del exchange
-        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
-        val exchArgs=exchange.arguments
+        val exchange = cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
+        val exchArgs = exchange.arguments
         if (userId == UUID.fromString("${exchArgs["admin"]}")) {
             if (exchArgs["type"] == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
                     //unbindings
                     channel.exchangeUnbind(rns.getUserExchangeName(user), exchange.name, "*")
                 }
-            }
-            else{
+            } else {
                 throw ChatAuthorizationException(" It is not a group")
             }
-        }
-        else{
+        } else {
             throw ChatAuthorizationException(" You are not the admin of the group")
         }
 
     }
 
-    fun deleteChat(userId: UUID, conversationId: UUID,){
+    fun deleteConversation(userId: UUID, conversationId: UUID): Boolean? {
         //obtenecion de los argumentos del exchange de sala
-        val exchange= cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
-        val exchArgs=exchange.arguments
-        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
-            if (exchArgs["type"] == ChatRoomType.GROUP) {
-                channel.exchangeDelete(exchange.name)
-            } else {
-                throw ChatAuthorizationException(" You are not the admin of the group")
+        val exchange = cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId)) ?: return null
+        val exchArgs = exchange.arguments
+        val roomType = ChatRoomType.valueOf(exchArgs["type"].toString())
+        when (roomType) {
+            ChatRoomType.GROUP -> {
+                if (userId == UUID.fromString("${exchArgs["owner"]}")) {
+                    channel.exchangeDelete(exchange.name)
+                } else {
+                    throw ChatAuthorizationException(" You are not the admin of the group")
+                }
             }
+            ChatRoomType.COUPLE -> {
+                if (rabbitManageService.authorizeSendToGroup(
+                        rns.getConversationExchangeName(conversationId),
+                        rns.getUserExchangeName(userId),
+                    )
+                ) {
+                    channel.exchangeDelete(exchange.name)
+                } else {
+                    throw ChatAuthorizationException(" You are not the allowed to delete this conversation")
+                }
+            }
+            else -> throw ChatAuthorizationException(" You are not the allowed to delete this conversation")
         }
+        return true
     }
-
 }

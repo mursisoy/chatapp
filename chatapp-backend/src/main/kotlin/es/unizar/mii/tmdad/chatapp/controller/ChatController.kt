@@ -6,6 +6,7 @@ import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
 import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
 import es.unizar.mii.tmdad.chatapp.dao.UserEntity
 import es.unizar.mii.tmdad.chatapp.dto.*
+import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import es.unizar.mii.tmdad.chatapp.repository.MessageRepository
 import es.unizar.mii.tmdad.chatapp.service.*
 import org.apache.commons.io.IOUtils
@@ -86,7 +87,7 @@ class ChatController(
                                     id = it.id.toString()
                                 )
                             }
-                        } ?: null,
+                        },
                         type = conversation.type
                     )
                 }
@@ -124,7 +125,7 @@ class ChatController(
                                             id = it.id.toString()
                                         )
                                     }
-                                } ?: null,
+                                },
                                 type = conversation.type
                             )
                         )
@@ -175,7 +176,7 @@ class ChatController(
             type = chatRoomRequest.type.name
         )
 
-        chatRoomService.save(chatRoom)
+//        chatRoomService.save(chatRoom)
         rabbitService.createChat(chatRoom)
 
         return ResponseEntity.ok(
@@ -186,14 +187,14 @@ class ChatController(
                     username = it.username
                 ) },
                 type = chatRoom.type,
-                owner = chatRoom.owner?.let { owner ->
-                    userService.loadUserById(owner).let {
+                owner = chatRoom.owner?.let { ownerId ->
+                    userService.loadUserById(ownerId).let {
                         ContactInfoResponse(
                             username = it.username,
                             id = it.id.toString()
                         )
                     }
-                } ?: null,
+                },
                 name = chatRoom.name
             )
         )
@@ -202,11 +203,24 @@ class ChatController(
     @DeleteMapping("conversations/{conversationId}")
     fun deleteConversation(
         authentication: Authentication,
-        @RequestBody infoDelete: DeleteChatRequest,
         @PathVariable conversationId: UUID
-    ) {
+    ): ResponseEntity<*> {
         val loggedInUser = authentication.principal as UserEntity
-        rabbitService.deleteChat(loggedInUser.id, conversationId)
+        return try {
+            rabbitService.deleteConversation(loggedInUser.id, conversationId)
+            messageRepository.deleteByTo(conversationId)
+            ResponseEntity.ok().build<String>()
+        } catch (e: ChatAuthorizationException){
+            ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(
+                    ErrorResponse(
+                        status= HttpStatus.FORBIDDEN.value(),
+                        title= e.message))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(e.message)
+        }
+
     }
 
     @PatchMapping("/conversation/contacts")
