@@ -80,6 +80,21 @@ class ChatController(
                                 )
                             }
                         },
+                        messages = messageRepository.findByTo(conversation.id).map {
+                            ChatMessageResponse(
+                                id = it.id,
+                                date = it.date,
+                                to = it.to,
+                                from = it.from,
+                                content = it.content,
+                                media = it.media?.let { media -> ConversationFileUploadResponse(
+                                    id = media.id,
+                                    size = media.size,
+                                    type = media.type,
+                                    name = media.name,
+                                )}
+                            )
+                        },
                         owner = conversation.owner?.let { owner ->
                             userService.loadUserById(owner).let {
                                 ContactInfoResponse(
@@ -117,6 +132,21 @@ class ChatController(
                                             id = it.id.toString()
                                         )
                                     }
+                                },
+                                messages = messageRepository.findByTo(conversation.id).map {
+                                    ChatMessageResponse(
+                                        id = it.id,
+                                        date = it.date,
+                                        to = it.to,
+                                        content = it.content,
+                                        from = it.from,
+                                        media = it.media?.let { media -> ConversationFileUploadResponse(
+                                            id = media.id,
+                                            size = media.size,
+                                            type = media.type,
+                                            name = media.name,
+                                        )}
+                                    )
                                 },
                                 owner = conversation.owner?.let { owner ->
                                     userService.loadUserById(owner).let {
@@ -220,7 +250,6 @@ class ChatController(
             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(e.message)
         }
-
     }
 
     @PatchMapping("/conversation/contacts")

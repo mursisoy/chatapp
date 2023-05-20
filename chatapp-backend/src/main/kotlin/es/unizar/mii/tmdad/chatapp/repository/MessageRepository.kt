@@ -9,4 +9,6 @@ interface MessageRepository: JpaRepository<ChatMessage, Int> {
 
     @Transactional
     fun deleteByTo(to: UUID)
+
+    fun findByTo(to: UUID): List<ChatMessage>
 }
