@@ -25,9 +25,12 @@ const isFollowUp = (index: number, previousIndex: number): boolean => {
   if (previousIndex < 0) {
     return false;
   } else {
-    let previousSender = activeConversation.messages[previousIndex].from;
-    let currentSender = activeConversation.messages[index].from;
-    return previousSender === currentSender;
+    if (activeConversation.messages ) {
+      let previousSender = activeConversation.messages[previousIndex].from;
+      let currentSender = activeConversation.messages[index].from;
+      return previousSender === currentSender;
+    }
+    return false;
   }
 };
 

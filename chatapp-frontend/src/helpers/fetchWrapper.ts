@@ -3,7 +3,8 @@ export const fetchWrapper = {
     get: request('GET'),
     post: request('POST'),
     put: request('PUT'),
-    delete: request('DELETE')
+    delete: request('DELETE'),
+    multipart: requestMultipartFormData('POST')
 };
 
 function request(method: string) {
@@ -29,6 +30,26 @@ function request(method: string) {
     }
 }
 
+function requestMultipartFormData(method: string) {
+    return (url: string, body?: object) => {
+
+        const requestOptions: RequestInit = {
+            method: method,
+        };
+
+        const headers = new Headers();
+
+        const auth = authHeader(url)
+
+        if (auth)
+            headers.set('Authorization', auth)
+        // @ts-ignore
+        requestOptions.body = body;
+        requestOptions.headers = headers
+        return fetch(url, requestOptions).then(handleResponse);
+    }
+}
+
 // helper functions
 
 function authHeader(url: string) {
@@ -41,7 +62,11 @@ function authHeader(url: string) {
     }
 }
 
-function handleResponse(response: any) {
+function handleResponse(response: Response) {
+    if (response.headers.get('Content-Type') == 'application/octet-stream') {
+        return response
+    }
+
     return response.text().then((text: string)=> {
         const data = text && JSON.parse(text);
 

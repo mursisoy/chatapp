@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type {Ref} from "vue";
-import type {IConversation, IMessage} from "@src/types";
+import type {IConversation, IEnvelope, IFileUpload, IMessage} from "@src/types";
 
 import useStore from "@src/store/store";
 import {ref, inject, onMounted, computed} from "vue";
@@ -106,6 +106,35 @@ function sendMessage() {
   })
 
   value.value = ""
+}
+
+function sendAttachmentMessage(uploadFormData: IFileUpload) {
+
+
+  if (store.user != undefined && uploadFormData.file) {
+    const message: IEnvelope = {
+      date: new Date().getTime(),
+      content: uploadFormData.caption,
+      from: store.user!.username,
+      to: activeConversation.id
+    }
+    let formData = new FormData()
+    // @ts-ignore
+    formData.append('file', uploadFormData.file)
+    store.uploadFile(
+        activeConversation.id,
+        formData
+    ).then((result: any) => {
+      message.media = result
+      socketStore.sendMessage(message, uuidv4(), (frame: IFrame) => {
+        const index = getConversationIndex(activeConversation.id);
+        const message: IMessage = JSON.parse(frame.body)
+      })
+    }).catch((error:any) => console.error(error))
+  }
+
+  uploadFormData.file = null
+  uploadFormData.caption = ""
 }
 
 onMounted(() => {
@@ -263,6 +292,7 @@ onMounted(() => {
     <AttachmentsModal
         :open="openAttachmentsModal"
         :close-modal="() => (openAttachmentsModal = false)"
+        @send-attachment-message="sendAttachmentMessage"
     />
   </div>
 </template>

@@ -50,6 +50,7 @@ export interface IMessage {
   replyTo?: string;
   previewData?: IPreviewData;
   attachments?: IAttachment[];
+  media?: IMedia
   state: string;
 }
 
@@ -60,7 +61,7 @@ export interface IConversation {
   avatar?: string;
   admins?: string[];
   contacts: IContact[];
-  messages: IMessage[] | udefined;
+  messages: IMessage[] | undefined;
   pinnedMessage?: IMessage;
   pinnedMessageHidden?: boolean;
   replyMessage?: IMessage;
@@ -123,10 +124,22 @@ export interface ICreateGroup {
   contacts: String[]
 }
 
+export interface IMedia {
+  id: string,
+  name?: string,
+  size: number,
+  type?: string
+}
 export interface IEnvelope {
   from: string,
   to: string,
   type?: string;
   content?: string | IRecording;
   date: number;
+  media?: IFileUpload
+}
+
+export interface IFileUpload{
+  file?: File | null,
+  caption: string
 }

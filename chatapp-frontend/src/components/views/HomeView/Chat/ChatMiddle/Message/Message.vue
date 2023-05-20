@@ -18,6 +18,7 @@ import LinkPreview from "@src/components/views/HomeView/Chat/ChatMiddle/Message/
 import MessageContextMenu from "@src/components/views/HomeView/Chat/ChatMiddle/Message/MessageContextMenu.vue";
 import Recording from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Recording.vue";
 import MessagePreview from "@src/components/views/HomeView/Chat/MessagePreview.vue";
+import Media from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Media.vue";
 import Receipt from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Receipt.vue";
 
 const props = defineProps<{
@@ -53,6 +54,11 @@ const handleShowContextMenu = (event: any) => {
         : event.pageY,
   };
 };
+
+const messageTime = (timestamp: number): string => {
+  let date = new Date(timestamp)
+  return date.getHours() + ":" + date.getMinutes();
+}
 
 // closes the context menu
 const handleCloseContextMenu = () => {
@@ -162,6 +168,12 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
             :self="props.self"
           />
 
+          <Media
+              v-if="props.message.media"
+              :message="props.message"
+              :self="props.self"
+          />
+
           <!--link preview-->
           <LinkPreview
             v-if="props.message.previewData && !props.message.attachments"
@@ -174,7 +186,7 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
         <!--date-->
         <div :class="props.self ? ['ml-4', 'order-1'] : ['mr-4']">
           <Typography variant="body-1" class="whitespace-pre">
-            {{ props.message.date }}
+            {{ messageTime(props.message.date) }}
           </Typography>
         </div>
 

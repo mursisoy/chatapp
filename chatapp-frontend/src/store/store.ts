@@ -97,6 +97,12 @@ const useStore = defineStore("chat", () => {
         conversationRequest
     )
   }
+
+  async function uploadFile(conversationId: string, fileUploadRequest: any) {
+    return fetchWrapper.multipart(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversation/${conversationId}/files`,
+        fileUploadRequest
+    )
+  }
   // async getContacts(): Promise<IContact[]> {
   //   const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/contacts`)
   //   return res.contacts
@@ -110,7 +116,7 @@ const useStore = defineStore("chat", () => {
   async function updateConversations() {
     const res = await fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations`)
     console.debug("Conversations updated")
-    res.conversations?.forEach( (conversation) => {
+    res.conversations?.forEach( (conversation: IConversation) => {
       const index = getConversationIndex(conversation.id);
       if (index == null) {
         conversations.value.push(conversation)
@@ -130,6 +136,10 @@ const useStore = defineStore("chat", () => {
     } else {
       conversations.value[index] = {...conversations.value[index] ,...conversation}
     }
+  }
+
+  async function downloadFile(conversationId: string, fileId: string) {
+    return fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversation/${conversationId}/files/${fileId}`)
   }
 
   return {
@@ -162,7 +172,9 @@ const useStore = defineStore("chat", () => {
     createConversation,
     updateContacts,
     updateConversations,
-    updateConversation
+    updateConversation,
+    uploadFile,
+    downloadFile
   };
 });
 
