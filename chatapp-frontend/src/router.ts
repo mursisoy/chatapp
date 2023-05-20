@@ -3,6 +3,7 @@ import AccessView from "@src/components/views/AccessView/AccessView.vue";
 import HomeView from "@src/components/views/HomeView/HomeView.vue";
 import PasswordResetView from "@src/components/views/PasswordResetView/PasswordResetView.vue";
 import {useUserStore} from "@src/store/user";
+import useStore from "@src/store/store";
 
 const routes = [
   {
@@ -13,6 +14,22 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: "/conversations/:conversationId",
+    name: "Conversation Handler",
+    redirect: (to: any) => {
+      const store = useStore();
+      // the function receives the target route as the argument
+      // a relative location doesn't start with `/`
+      // or { path: 'profile'}
+      store.activeConversationId = to.params.conversationId
+      return {name:'Home'}
+    },
+    meta: {
+      requiresAuth: true
+    }
+  },
+
   {
     path: "/access/:method/",
     name: "Access",
