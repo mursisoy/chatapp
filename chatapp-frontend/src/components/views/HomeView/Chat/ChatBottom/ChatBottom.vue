@@ -104,7 +104,10 @@ function sendMessage() {
     //   )
     // }
   })
-
+  const index = getConversationIndex(activeConversation.id);
+  if (index !== undefined) {
+    store.conversations[index].draftMessage = "";
+  }
   value.value = ""
 }
 
