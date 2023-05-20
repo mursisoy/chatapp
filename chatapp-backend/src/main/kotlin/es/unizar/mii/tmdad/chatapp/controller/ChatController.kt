@@ -252,7 +252,7 @@ class ChatController(
         }
     }
 
-    @PatchMapping("/conversation/contacts")
+    @PatchMapping("/conversations/{conversationId}/contacts")
     fun addConversationContacts(
         authentication: Authentication,
         @RequestBody updateConversationContactsRequest: UpdateConversationContactsRequest
@@ -334,7 +334,7 @@ class ChatController(
         }
     }
 
-    @PostMapping("/conversation/{conversationId}/files")
+    @PostMapping("/conversations/{conversationId}/files")
     fun conversationFileUpload(
         authentication: Authentication,
         @PathVariable conversationId: UUID,
@@ -364,7 +364,7 @@ class ChatController(
         }
     }
 
-    @GetMapping("/conversation/{conversationId}/files/{fileId}")
+    @GetMapping("/conversations/{conversationId}/files/{fileId}")
     @ResponseBody
     fun serveFile(
         authentication: Authentication,
