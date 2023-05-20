@@ -2,7 +2,7 @@
 import type { IConversation } from "@src/types";
 
 import useStore from "@src/store/store";
-import { inject, ref, computed } from "vue";
+import {inject, ref, computed, Ref} from "vue";
 
 import ConversationInfoModal from "@src/components/shared/modals/ConversationInfoModal/ConversationInfoModal.vue";
 import SearchModal from "@src/components/shared/modals/SearchModal/SearchModal.vue";
@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const store = useStore();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 const openSearch = ref(false);
 

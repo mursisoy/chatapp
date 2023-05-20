@@ -155,6 +155,20 @@ const useStore = defineStore("chat", () => {
     return fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}/files/${fileId}`)
   }
 
+  async function updateConversationContacts(conversationId: string, request: any) {
+      return fetchWrapper.patch(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}/contacts`, request)
+        .then(response => {
+          const index = getConversationIndex(conversationId);
+          if (index == null) {
+            conversations.value.push(response)
+          } else {
+            conversations.value[index] = {...conversations.value[index] ,...response}
+            activeConversationId.value = conversationId
+          }
+          return response
+        })
+  }
+
   return {
     // status refs
     status,
@@ -188,7 +202,8 @@ const useStore = defineStore("chat", () => {
     updateConversation,
     uploadFile,
     downloadFile,
-    deleteConversation
+    deleteConversation,
+    updateConversationContacts
   };
 });
 

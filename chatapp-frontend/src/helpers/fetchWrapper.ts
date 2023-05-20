@@ -4,6 +4,7 @@ export const fetchWrapper = {
     post: request('POST'),
     put: request('PUT'),
     delete: request('DELETE'),
+    patch: request('PATCH'),
     multipart: requestMultipartFormData('POST')
 };
 
