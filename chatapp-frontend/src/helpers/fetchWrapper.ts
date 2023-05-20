@@ -8,7 +8,7 @@ export const fetchWrapper = {
 };
 
 function request(method: string) {
-    return (url: string, body?: object) => {
+    return (url: string, body?: object, handle = true) => {
 
         const requestOptions: RequestInit = {
             method: method,
@@ -26,7 +26,11 @@ function request(method: string) {
             requestOptions.body = JSON.stringify(body);
         }
         requestOptions.headers = headers
-        return fetch(url, requestOptions).then(handleResponse);
+        if (handle) {
+            return fetch(url, requestOptions).then(handleResponse);
+        } else {
+            return fetch(url, requestOptions)
+        }
     }
 }
 
@@ -72,7 +76,7 @@ function handleResponse(response: Response) {
 
         if (!response.ok) {
             const { user, logout } = useUserStore();
-            if ([401, 403].includes(response.status) && user) {
+            if ([401].includes(response.status) && user) {
                 // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 logout();
             }
