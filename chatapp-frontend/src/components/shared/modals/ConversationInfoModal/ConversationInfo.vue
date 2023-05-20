@@ -48,11 +48,11 @@ const imageUrl = computed(() => {
         class="default-outline"
         tabindex="0"
       >
-        <span v-if="conversation.type === 'couple' || props.contact"
+        <span v-if="conversation.type === 'COUPLE' || props.contact"
           >Contact</span
         >
-        <span v-else-if="conversation.type === 'group'">Group</span>
-        <span v-else-if="conversation.type === 'broadcast'">Broadcast</span>
+        <span v-else-if="conversation.type === 'GROUP'">Group</span>
+        <span v-else-if="conversation.type === 'BROADCAST'">Broadcast</span>
         Info
       </Typography>
 
@@ -131,13 +131,13 @@ const imageUrl = computed(() => {
 
             <Typography variant="body-2" class="font-extralight text-start">
               <!--last seen-->
-              <span v-if="conversation.type === 'couple' || contact">
+              <span v-if="conversation.type === 'COUPLE' || contact">
                 Last seen Dec 16, 2019
               </span>
 
               <!--or number of group members-->
               <span
-                v-else-if="['group', 'broadcast'].includes(conversation.type)"
+                v-else-if="['GROUP', 'BROADCAST'].includes(conversation.type)"
               >
                 {{ conversation.contacts.length }}
                 Contacts
@@ -147,7 +147,7 @@ const imageUrl = computed(() => {
 
           <IconButton
             title="edit group"
-            v-if="['group', 'broadcast'].includes(conversation.type)"
+            v-if="['GROUP', 'BROADCAST'].includes(conversation.type)"
             class="group w-7 h-7"
           >
             <PencilIcon
@@ -168,7 +168,7 @@ const imageUrl = computed(() => {
     <div class="w-full py-5 border-t border-gray-100 dark:border-gray-700">
       <!--(contact) email-->
       <div
-        v-if="conversation.type === 'couple' || props.contact"
+        v-if="conversation.type === 'COUPLE' || props.contact"
         class="flex px-5 pb-5 items-center"
       >
         <InfoItem
@@ -180,7 +180,7 @@ const imageUrl = computed(() => {
       <!--(group) members-->
       <div
         v-if="
-          ['group', 'broadcast'].includes(conversation.type) && !props.contact
+          ['GROUP', 'BROADCAST'].includes(conversation.type) && !props.contact
         "
         class="px-5 flex items-center pb-5"
       >
