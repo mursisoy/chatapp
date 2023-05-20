@@ -61,6 +61,7 @@ export interface IConversation {
   name?: string;
   avatar?: string;
   admins?: string[];
+  owner?: IContact;
   contacts: IContact[];
   messages: IMessage[] | undefined;
   pinnedMessage?: IMessage;
