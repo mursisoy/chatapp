@@ -99,7 +99,7 @@ const useStore = defineStore("chat", () => {
   }
 
   async function uploadFile(conversationId: string, fileUploadRequest: any) {
-    return fetchWrapper.multipart(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversation/${conversationId}/files`,
+    return fetchWrapper.multipart(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}/files`,
         fileUploadRequest
     )
   }
@@ -152,7 +152,7 @@ const useStore = defineStore("chat", () => {
   }
 
   async function downloadFile(conversationId: string, fileId: string) {
-    return fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversation/${conversationId}/files/${fileId}`)
+    return fetchWrapper.get(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}/files/${fileId}`)
   }
 
   return {
