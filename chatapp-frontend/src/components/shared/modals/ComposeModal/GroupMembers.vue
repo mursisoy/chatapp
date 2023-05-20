@@ -25,14 +25,14 @@ const emit = defineEmits(['update:modelValue','activePageChange']);
 const selectedContacts: Ref<IContact[]> = ref([]);
 
 const filteredContacts = computed(() => {
-  return store.contacts?.filter(contact => contact.username != store.user?.username)
+  return store.contacts?.filter(contact => contact.id != store.user?.id)
 })
 
 // checks whether a contact is selected or not
 const isContactSelected = (contact: IContact) => {
   if (contact) {
     return Boolean(
-      selectedContacts.value.find((item) => item.username === contact.username)
+      selectedContacts.value.find((item) => item.id === contact.id)
     );
   } else {
     return false;
@@ -42,14 +42,14 @@ const isContactSelected = (contact: IContact) => {
 // (event) change the value of selected contacts
 const handleSelectedContactsChange = (contact: IContact) => {
   let contactIndex = selectedContacts.value.findIndex(
-    (item) => item.username === contact.username
+    (item) => item.id === contact.id
   );
   if (contactIndex !== -1) {
     selectedContacts.value.splice(contactIndex, 1);
     props.modelValue.contacts.splice(contactIndex, 1);
   } else {
     selectedContacts.value.push(contact);
-    props.modelValue.contacts.push(contact.username);
+    props.modelValue.contacts.push(contact.id);
   }
 };
 </script>

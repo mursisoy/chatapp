@@ -27,12 +27,11 @@ function contactSelected(contact: IContact){
         {
           type: "COUPLE",
           contacts: [
-            contact.username,
-            store.user.username
+            contact.id,
+            store.user.id
           ]
         }
     ).then((conversation: IConversation) => {
-      console.debug(conversation)
       conversation.messages = []
       store.conversations.push(conversation)
       store.activeConversationId = conversation.id

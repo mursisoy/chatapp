@@ -42,13 +42,13 @@ const updateModelValue = (data: ICreateGroup) => {
 }
 
 const createGroup = async () => {
-  console.debug(createGroupForm.value.name)
+  // console.debug(createGroupForm.value.name)
   if (store.user != undefined && createGroupForm.value.contacts.length > 0) {
     store.createConversation(
         {
           type: "GROUP",
           name: createGroupForm.value.name,
-          contacts: createGroupForm.value.contacts.concat(store.user.username)
+          contacts: createGroupForm.value.contacts.concat(store.user.id)
         }
     ).then((conversation: IConversation) => {
       console.debug(conversation)
