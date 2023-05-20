@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IConversation, IUser } from "@src/types";
-import { inject } from "vue";
+import {inject, Ref} from "vue";
 
 import useStore from "@src/store/store";
 import { getConversationIndex } from "@src/utils";
@@ -12,12 +12,12 @@ import MessagePreview from "@src/components/views/HomeView/Chat/MessagePreview.v
 
 const store = useStore();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 // (event) hide the pinned message
 const handleHidePinnedMessage = () => {
-  if (activeConversation) {
+  if (activeConversation.value) {
     // get the active conversation index in the state store
-    let activeConversationIndex = getConversationIndex(activeConversation.id);
+    let activeConversationIndex = getConversationIndex(activeConversation.value.id);
 
     if (
       store.conversations &&
@@ -32,9 +32,9 @@ const handleHidePinnedMessage = () => {
 
 // (event) remove the pinned message
 const handleRemovePinnedMessage = () => {
-  if (activeConversation) {
+  if (activeConversation.value) {
     // get the active conversation index in the state store
-    let activeConversationIndex = getConversationIndex(activeConversation.id);
+    let activeConversationIndex = getConversationIndex(activeConversation.value.id);
 
     if (
       store.conversations &&

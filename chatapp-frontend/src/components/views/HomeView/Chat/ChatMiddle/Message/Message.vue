@@ -31,7 +31,7 @@ const props = defineProps<{
   handleDeselectMessage: (messageId: string) => void;
 }>();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 const showContextMenu = ref(false);
 
@@ -86,7 +86,7 @@ const hideAvatar = () => {
 };
 
 // Reply message
-const replyMessage = getMessageById(activeConversation, props.message.replyTo);
+const replyMessage = getMessageById(activeConversation.value, props.message.replyTo);
 </script>
 
 <template>

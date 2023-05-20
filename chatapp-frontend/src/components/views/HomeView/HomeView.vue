@@ -93,6 +93,7 @@ onMounted(() => {
     // archivedConversations: request.data.archivedConversations,
   });
   socketStore.init(onMessageReceived, onError);
+
 })
 
 onUnmounted( () => {

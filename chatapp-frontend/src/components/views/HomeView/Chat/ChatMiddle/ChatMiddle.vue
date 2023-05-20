@@ -18,16 +18,16 @@ const store = useStore();
 
 const container: Ref<HTMLElement | null> = ref(null);
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 // checks whether the previous message was sent by the same user.
 const isFollowUp = (index: number, previousIndex: number): boolean => {
   if (previousIndex < 0) {
     return false;
   } else {
-    if (activeConversation.messages ) {
-      let previousSender = activeConversation.messages[previousIndex].from;
-      let currentSender = activeConversation.messages[index].from;
+    if (activeConversation.value.messages ) {
+      let previousSender = activeConversation.value.messages[previousIndex].from;
+      let currentSender = activeConversation.value.messages[index].from;
       return previousSender === currentSender;
     }
     return false;

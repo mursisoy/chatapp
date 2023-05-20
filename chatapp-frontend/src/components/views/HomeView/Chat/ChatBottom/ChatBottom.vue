@@ -29,7 +29,7 @@ import {IFrame} from "@stomp/stompjs";
 const store = useStore();
 const socketStore = useSocketStore();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 // the content of the message.
 const value: Ref<string> = ref("");
@@ -77,26 +77,27 @@ const handleSetDraft = () => {
 };
 
 const canWriteMessage = computed(() => {
-  return activeConversation.type != "BROADCAST" || store.user?.role == "ADMIN"
+  return activeConversation.value.type != "BROADCAST" || store.user?.role == "ADMIN"
 })
 
 
 function sendMessage() {
+  console.debug(activeConversation.value.id)
   const message: IMessage = {
     date: new Date().getTime(),
     content: value.value,
     from: store.user!.username,
     state: "PENDING",
     id: null,
-    to: activeConversation.id
+    to: activeConversation.value.id
   }
   socketStore.sendMessage({
     date: message.date,
     from: store.user!.id,
-    to: activeConversation.id,
+    to: activeConversation.value.id,
     content: message.content
   }, uuidv4(), (frame: IFrame) => {
-    const index = getConversationIndex(activeConversation.id);
+    const index = getConversationIndex(activeConversation.value.id);
     const message: IMessage = JSON.parse(frame.body)
     // if (index !== undefined) {
     //   store.conversations[index].messages.set(
@@ -104,7 +105,7 @@ function sendMessage() {
     //   )
     // }
   })
-  const index = getConversationIndex(activeConversation.id);
+  const index = getConversationIndex(activeConversation.value.id);
   if (index !== undefined) {
     store.conversations[index].draftMessage = "";
   }
@@ -112,25 +113,23 @@ function sendMessage() {
 }
 
 function sendAttachmentMessage(uploadFormData: IFileUpload) {
-
-
   if (store.user != undefined && uploadFormData.file) {
     const message: IEnvelope = {
       date: new Date().getTime(),
       content: uploadFormData.caption,
       from: store.user!.username,
-      to: activeConversation.id
+      to: activeConversation.value.id
     }
     let formData = new FormData()
     // @ts-ignore
     formData.append('file', uploadFormData.file)
     store.uploadFile(
-        activeConversation.id,
+        activeConversation.value.id,
         formData
     ).then((result: any) => {
       message.media = result
       socketStore.sendMessage(message, uuidv4(), (frame: IFrame) => {
-        const index = getConversationIndex(activeConversation.id);
+        const index = getConversationIndex(activeConversation.value.id);
         const message: IMessage = JSON.parse(frame.body)
       })
     }).catch((error:any) => console.error(error))
@@ -141,7 +140,7 @@ function sendAttachmentMessage(uploadFormData: IFileUpload) {
 }
 
 onMounted(() => {
-  value.value = activeConversation.draftMessage;
+  value.value = activeConversation.value.draftMessage;
 });
 </script>
 
