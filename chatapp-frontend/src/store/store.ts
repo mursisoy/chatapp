@@ -140,13 +140,15 @@ const useStore = defineStore("chat", () => {
 
   async function deleteConversation(conversationId: string) {
     const index = getConversationIndex(conversationId);
-    const res: Response = await fetchWrapper.delete(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}`)
-    console.debug(res)
-    if ( res.status == 200) {
-      if (index != null) {
-        delete conversations.value[index]
-      }
-    }
+    return await fetchWrapper.delete(`${import.meta.env.VITE_APP_BACKEND_URL}/api/v1/chat/conversations/${conversationId}`, undefined,false)
+        .then(response => {
+          if (response.status == 200) {
+            if (index != null) {
+              activeConversationId.value = undefined
+              conversations.value.splice(index,1)
+            }
+          }
+        })
   }
 
   async function downloadFile(conversationId: string, fileId: string) {
