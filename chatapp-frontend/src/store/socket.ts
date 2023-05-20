@@ -69,7 +69,8 @@ const useSocketStore = defineStore("socket", () => {
     }
 
     function sendMessage(message: IEnvelope, receiptId: string, callback: frameCallbackType){
-        stompClient.watchForReceipt(receiptId, callback);
+        // stompClient.watchForReceipt(receiptId, callback);\
+        console.debug(message)
         stompClient.publish({
             destination: "/chat/message",
             headers: {receipt: receiptId},
