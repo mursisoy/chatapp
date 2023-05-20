@@ -255,8 +255,9 @@ class ChatController(
     @PatchMapping("/conversations/{conversationId}/contacts")
     fun addConversationContacts(
         authentication: Authentication,
+        @PathVariable conversationId: UUID,
         @RequestBody updateConversationContactsRequest: UpdateConversationContactsRequest
-    ): ResponseEntity<String> {
+    ): ResponseEntity<ConversationResponse> {
         val loggedInUser = authentication.principal as UserEntity
         rabbitService.addConversationContacts(
             loggedInUser.id,
@@ -268,7 +269,36 @@ class ChatController(
             updateConversationContactsRequest.id,
             updateConversationContactsRequest.removeContacts
         )
-        return ResponseEntity.ok().build()
+        val conversation = rabbitManageService.getConversationExchange(conversationId)
+
+        return if (conversation != null) {
+            ResponseEntity.ok(
+                ConversationResponse(
+                    id = "${conversation.id}",
+                    name = conversation.name,
+                    contacts = conversation.contacts.map { contactId ->
+                        userService.loadUserById(contactId).let {
+                            ContactInfoResponse(
+                                username = it.username,
+                                id = it.id.toString()
+                            )
+                        }
+                    },
+                    owner = conversation.owner?.let { owner ->
+                        userService.loadUserById(owner).let {
+                            ContactInfoResponse(
+                                username = it.username,
+                                id = it.id.toString()
+                            )
+                        }
+                    },
+                    messages = null,
+                    type = conversation.type
+                )
+            )
+        } else {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
     }
 
 

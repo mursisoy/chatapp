@@ -93,7 +93,7 @@ class RabbitService(
         //obtención de los argumentos del exchange
         val exchange = cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
         val exchArgs = exchange.arguments
-        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
+        if (userId == UUID.fromString("${exchArgs["owner"]}")) {
             if (ChatRoomType.valueOf("${exchArgs["type"]}") == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
                     channel.exchangeBind(rns.getUserExchangeName(user), exchange.name, "*")
@@ -110,8 +110,8 @@ class RabbitService(
         //obtención de los argumentos del exchange
         val exchange = cliente.getExchange(vhost, rns.getConversationExchangeName(conversationId))
         val exchArgs = exchange.arguments
-        if (userId == UUID.fromString("${exchArgs["admin"]}")) {
-            if (exchArgs["type"] == ChatRoomType.GROUP) {
+        if (userId == UUID.fromString("${exchArgs["owner"]}")) {
+            if (ChatRoomType.valueOf("${exchArgs["type"]}")  == ChatRoomType.GROUP) {
                 for (user in usersAffected) {
                     //unbindings
                     channel.exchangeUnbind(rns.getUserExchangeName(user), exchange.name, "*")

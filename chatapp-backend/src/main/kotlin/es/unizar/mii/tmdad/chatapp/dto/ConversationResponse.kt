@@ -5,7 +5,7 @@ data class ConversationResponse (
     val owner: ContactInfoResponse?,
     val name: String?,
     val type: String,
-    val messages: List<ChatMessageResponse>,
+    val messages: List<ChatMessageResponse>?,
     val contacts: List<ContactInfoResponse>
 ){
     override fun toString(): String {
