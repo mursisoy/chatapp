@@ -88,6 +88,11 @@ const handleRemoveUnread = () => {
     store.conversations[index].unread = 0;
   }
 };
+
+const copyConversationLink = () => {
+  navigator.clipboard.writeText(`${import.meta.env.VITE_APP_FRONTEND_URL}/conversations/${props.conversation.id}`);
+  handleCloseContextMenu();
+};
 </script>
 
 <template>
@@ -217,15 +222,15 @@ const handleRemoveUnread = () => {
       }"
       :position="['top-0']"
     >
-      <DropdownLink :handle-click="handleCloseContextMenu">
+      <DropdownLink :handle-click="copyConversationLink">
         <InformationCircleIcon class="h-5 w-5 mr-3" />
-        Conversation info
+        Copy conversation link
       </DropdownLink>
 
-      <DropdownLink :handle-click="handleCloseContextMenu">
-        <ArchiveBoxArrowDownIcon class="h-5 w-5 mr-3" />
-        Archive conversation
-      </DropdownLink>
+<!--      <DropdownLink :handle-click="handleCloseContextMenu">-->
+<!--        <ArchiveBoxArrowDownIcon class="h-5 w-5 mr-3" />-->
+<!--        Archive conversation-->
+<!--      </DropdownLink>-->
 
       <DropdownLink :handle-click="deleteConversation" color="danger">
         <TrashIcon class="h-5 w-5 mr-3" />
