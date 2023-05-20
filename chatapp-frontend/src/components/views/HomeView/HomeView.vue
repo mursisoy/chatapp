@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import {computed, onMounted, onUnmounted} from "vue";
 import {Client, IFrame, IMessage as StompMessage} from "@stomp/stompjs";
 
 import useStore from "@src/store/store";
@@ -45,10 +45,26 @@ function addMessageToConversation(conversationMessage: IMessage): Boolean {
   const index = getConversationIndex(conversationMessage.to);
   if (index == undefined)
     return false
-  if (store.conversations[index].messages == undefined) {
-    store.conversations[index].messages = []
+  let conversation = store.conversations[index]
+  if (conversation == undefined) return false
+
+  if (conversation.messages == undefined) {
+    conversation.messages = []
   }
-  store.conversations[index].messages.push(conversationMessage)
+  if (conversationMessage.to != store.activeConversationId) {
+    if (conversation.unread == undefined) {
+      conversation.unread = 1
+    } else {
+      conversation.unread += 1
+    }
+  }
+  let messageExists = conversation.messages.slice(0).reverse().find(message => message.id == conversationMessage.id)
+  if (messageExists == undefined) {
+    conversation.messages.push(conversationMessage)
+  } else{
+    messageExists.state = "unread"
+  }
+  // conversation.messages.push(conversationMessage)
   return true
 }
 
@@ -77,6 +93,10 @@ onMounted(() => {
     // archivedConversations: request.data.archivedConversations,
   });
   socketStore.init(onMessageReceived, onError);
+})
+
+onUnmounted( () => {
+  socketStore.close()
 })
 </script>
 
