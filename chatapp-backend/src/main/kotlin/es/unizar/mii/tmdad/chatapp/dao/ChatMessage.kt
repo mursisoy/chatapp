@@ -1,7 +1,10 @@
 package es.unizar.mii.tmdad.chatapp.dao
 
 import com.fasterxml.uuid.Generators
+import es.unizar.mii.tmdad.chatapp.dto.ConversationFileUploadResponse
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 
@@ -15,7 +18,8 @@ class ChatMessage (
     @Column(name="_to")
     val to: UUID,
     val content: String,
-    val media: String?,
+    @JdbcTypeCode(SqlTypes.JSON)
+    val media: ConversationFileUploadResponse?,
     @Column(name="_from_id")
     val from_id: UUID,
     @Column(name="_from")

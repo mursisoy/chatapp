@@ -10,6 +10,7 @@ import es.unizar.mii.tmdad.chatapp.repository.MessageRepository
 import es.unizar.mii.tmdad.chatapp.service.*
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -253,32 +254,60 @@ class ChatController(
     @PostMapping("/conversation/{conversationId}/files")
     fun conversationFileUpload(
         authentication: Authentication,
-        @PathVariable conversationId: String,
+        @PathVariable conversationId: UUID,
         @RequestParam("file") file: MultipartFile
-    ): ResponseEntity<String> {
+    ): ResponseEntity<ConversationFileUploadResponse?> {
         val loggedInUser = authentication.principal as UserEntity
-        return if ( rabbitManageService.authorizeSendToGroup(conversationId, loggedInUser.id.toString()) ) {
-//            minioService.uploadFile(conversationId, file)
-            return ResponseEntity.ok().build()
+        return if ( rabbitManageService.authorizeSendToGroup(
+                rns.getConversationExchangeName(conversationId),
+                rns.getUserExchangeName(loggedInUser.id) ) ) {
+            val fileId = minioService.uploadFile(file, conversationId.toString())
+            if (fileId != null) {
+                ResponseEntity.ok(
+                    ConversationFileUploadResponse(
+                        id = fileId,
+                        name= file.originalFilename,
+                        size = file.size,
+                        type = file.contentType
+                    )
+                )
+            } else {
+                ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
         } else {
             ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
 
-    @GetMapping("/conversation/{conversationId}/files/{filename:.+}")
+    @GetMapping("/conversation/{conversationId}/files/{fileId}")
     @ResponseBody
     fun serveFile(
         authentication: Authentication,
-        @PathVariable conversationId: String,
-        @PathVariable filename: String
+        @PathVariable conversationId: UUID,
+        @PathVariable fileId: UUID
     ): ResponseEntity<ByteArray> {
         val loggedInUser = authentication.principal as UserEntity
-        return if ( rabbitManageService.authorizeSendToGroup(conversationId, loggedInUser.id.toString()) ) {
-            ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(IOUtils.toByteArray(minioService.downloadFile(conversationId, filename)))
+        return if ( rabbitManageService.authorizeSendToGroup(
+                rns.getConversationExchangeName(conversationId),
+                rns.getUserExchangeName(loggedInUser.id) ) ) {
+            try {
+
+                val statObject = minioService.statFile(conversationId.toString(), fileId.toString())
+                val userMetadata = statObject.userMetadata()
+                val filename = userMetadata["filename"]
+
+                val response = ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                if (filename != null ) {
+                    response.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+                }
+                response.body(IOUtils.toByteArray(minioService.downloadFile(conversationId.toString(), fileId.toString())))
+            } catch (e: Exception){
+                logger.debug(e.stackTraceToString())
+                ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+            }
         } else{
-            ResponseEntity.notFound().build()
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
     }
 

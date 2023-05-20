@@ -6,7 +6,7 @@ data class ChatMessageRequest (
     var date: Long,
     val to: String,
     val content: String,
-    val media: String?
+    val media: ConversationFileUploadResponse?
 ) {
     override fun toString(): String {
         return "{draftId: ${draftId}, date: ${date.toString()}, to: '$to', content: '$content'}"

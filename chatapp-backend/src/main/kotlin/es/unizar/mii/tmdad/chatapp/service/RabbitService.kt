@@ -48,7 +48,11 @@ class RabbitService (private val channel: Channel,
                 conversationExchange,
                 rns.getUserExchangeName(message.from_id)
             ) ) {
-            channel.basicPublish(conversationExchange, "*", null, mapper.writeValueAsBytes(message))
+            channel.basicPublish(
+                conversationExchange,
+                "*",
+                null,
+                mapper.writeValueAsString(message).toByteArray())
             true
         } else {
             false
