@@ -17,8 +17,8 @@ services:
       POSTGRES_DB: chatapp
       POSTGRES_USER: chatapp
       POSTGRES_PASSWORD: chatapp
-#    volumes:
-#      - db-data:/var/lib/postgresql/data
+ #   volumes:
+  #    - db-data:/var/lib/postgresql/data
 
   adminer:
     image: adminer
@@ -43,7 +43,7 @@ services:
         - type: bind
           source: ./chatapp-frontend
           target: /app
-#        - node_modules:/app/node_modules
+        - node_modules:/app/node_modules
 
   backend:
     image: chatapp-backend:0.0.1-SNAPSHOT-debug
@@ -69,3 +69,46 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://chatapp:chatapp@db:5432/chatapp?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/queries/queries.yaml"
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      PG_EXPORTER_EXCLUDE_DATABASES: "template0,template1"
+      PG_EXPORTER_CONSTANT_LABELS: "cluster_name=local"
+    volumes:
+      - ./postgres-exporter/:/queries
+    ports:
+      - "9187:9187"
+
+  prometheus:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./volumes/prometheus_data:/prometheus
+      - ./prometheus-config/:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - db
+      - postgres-exporter
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    user: root
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./volumes/grafana/:/var/lib/grafana
+      - ./grafana:/etc/grafana
+    ports:
+      - "3000:3000"
+
