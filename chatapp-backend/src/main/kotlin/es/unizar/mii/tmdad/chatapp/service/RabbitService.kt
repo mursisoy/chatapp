@@ -70,8 +70,9 @@ class RabbitService (private val channel: Channel,
         }
 
         if (chatRoom.owner != null) {
-            args["admin"] = chatRoom.owner.toString()
+            args["owner"] = chatRoom.owner.toString()
         }
+        args["name"] = chatRoom.name.toString()
         args["id"] = chatRoom.id.toString()
 
         val conversationExchange = rns.getConversationExchangeName(chatRoom.id)
