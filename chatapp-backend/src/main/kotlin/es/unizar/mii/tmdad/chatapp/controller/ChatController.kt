@@ -9,7 +9,9 @@ import es.unizar.mii.tmdad.chatapp.dto.*
 import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import es.unizar.mii.tmdad.chatapp.repository.MessageRepository
 import es.unizar.mii.tmdad.chatapp.service.*
+nimport jakarta.validation.Valid
 import org.apache.commons.io.IOUtils
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -30,6 +32,7 @@ import java.util.*
 
 
 @Controller
+@ControllerAdvice
 @RequestMapping("/api/v1/chat")
 class ChatController(
     private val simpMessageSendingOperations: SimpMessageSendingOperations,
@@ -44,6 +47,11 @@ class ChatController(
 
     //    private val chatrooms = mutableListOf<ChatRoom>()
     private val logger = LoggerFactory.getLogger(javaClass)
+    @ExceptionHandler(SizeLimitExceededException::class)
+    @ResponseStatus(value = HttpStatus.PAYLOAD_TOO_LARGE)
+    fun handleSizeSizeLimitExceededException(e: SizeLimitExceededException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.PAYLOAD_TOO_LARGE)
+    }
 
     @GetMapping("contacts")
     fun getContacts(principal: Principal, authentication: Authentication): ResponseEntity<ContactListResponse> {
@@ -304,10 +312,12 @@ class ChatController(
 
     @MessageMapping("/message")
     fun message(
-        @Payload draftMessage: ChatMessageRequest,
+        @Valid @Payload draftMessage: ChatMessageRequest,
         authentication: Authentication,
         @Header(StompHeaderAccessor.STOMP_RECEIPT_HEADER) receiptId: String
     ) {
+
+
         val loggedInUser = authentication.principal as UserEntity
         val conversationId = UUID.fromString(draftMessage.to)
         val newMessage = ChatMessage(
