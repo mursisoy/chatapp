@@ -1,10 +1,12 @@
 package es.unizar.mii.tmdad.chatapp.dto
 
+import java.util.*
+
 data class ChatMessageRequest (
     var id: String?,
     var draftId: String?,
     var date: Long,
-    val to: String,
+    val to: UUID,
     val content: String,
     val media: ConversationFileUploadResponse?
 ) {
