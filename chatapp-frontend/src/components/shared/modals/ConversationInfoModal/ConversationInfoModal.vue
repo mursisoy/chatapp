@@ -10,6 +10,7 @@ import Members from "@src/components/shared/modals/ConversationInfoModal/Members
 import SharedMedia from "@src/components/shared/modals/ConversationInfoModal/SharedMedia.vue";
 import Modal from "@src/components/ui/utils/Modal.vue";
 import SlideTransition from "@src/components/ui/transitions/SlideTransition.vue";
+import NonMembers from "@src/components/shared/modals/ConversationInfoModal/NonMembers.vue";
 
 defineEmits(["activePageChange"]);
 
@@ -31,6 +32,7 @@ const activePageName = ref("conversation-info");
 // the active modal page component
 const ActivePage = computed(() => {
   if (activePageName.value === "conversation-info") return ConversationInfo;
+  else if (activePageName.value === "non-members") return NonMembers;
   else if (activePageName.value === "members") return Members;
   else if (activePageName.value === "group-member") return ConversationInfo;
   else if (activePageName.value === "shared-media") return SharedMedia;

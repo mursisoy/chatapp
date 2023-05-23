@@ -108,7 +108,7 @@ export const user = {
 export const conversations = [
   // {
   //   id: 1,
-  //   type: "couple",
+  //   type: "COUPLE",
   //   unread: 2,
   //   draftMessage: "",
   //   contacts: [
@@ -325,7 +325,7 @@ export const conversations = [
   //
   // {
   //   id: 2,
-  //   type: "couple",
+  //   type: "COUPLE",
   //   draftMessage: "",
   //   contacts: [
   //     {
@@ -483,7 +483,7 @@ export const conversations = [
   //
   // {
   //   id: 6,
-  //   type: "group",
+  //   type: "GROUP",
   //   name: "Design Team",
   //   avatar:
   //     "https://images.unsplash.com/photo-1573867639040-6dd25fa5f597?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80",
@@ -629,7 +629,7 @@ export const conversations = [
   //
   // {
   //   id: 7,
-  //   type: "broadcast",
+  //   type: "BROADCAST",
   //   name: "Breaking News",
   //   avatar:
   //     "https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
@@ -705,7 +705,7 @@ export const conversations = [
 export const archive = [
   // {
   //   id: 3,
-  //   type: "couple",
+  //   type: "COUPLE",
   //   draftMessage: "",
   //   contacts: [
   //     {
@@ -748,7 +748,7 @@ export const archive = [
   //
   // {
   //   id: 4,
-  //   type: "couple",
+  //   type: "COUPLE",
   //   draftMessage: "",
   //   contacts: [
   //     {

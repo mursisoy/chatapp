@@ -29,7 +29,7 @@ class SecurityConfiguration(
             .headers().frameOptions().sameOrigin()
             .and()
             .authorizeHttpRequests()
-            .requestMatchers("/api/v1/auth/register","/api/v1/auth/login", "/csrf", "/ws")
+            .requestMatchers("/api/v1/auth/register","/api/v1/auth/login", "/ws")
             .permitAll()
             .anyRequest()
             .authenticated()

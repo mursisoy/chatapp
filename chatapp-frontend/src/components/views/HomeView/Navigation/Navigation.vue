@@ -15,6 +15,7 @@ import {
 import AccountDropdown from "@src/components/views/HomeView/Navigation/AccountDropdown.vue";
 import Logo from "@src/components/views/HomeView/Navigation/Logo.vue";
 import NavLink from "@src/components/views/HomeView/Navigation/NavLink.vue";
+import {PresentationChartBarIcon} from "@heroicons/vue/20/solid";
 
 const store = useStore();
 
@@ -24,6 +25,10 @@ const showDropdown = ref(false);
 const handleActiveSidebarComponentChange = (value: string) => {
   store.activeSidebarComponent = value;
 };
+
+const openMetrics = () => {
+  window.open('/grafana/','_blank')!.focus()
+}
 </script>
 
 <template>
@@ -56,6 +61,13 @@ const handleActiveSidebarComponentChange = (value: string) => {
               :active="store.activeSidebarComponent === 'contacts'"
             />
           </li>
+          <li v-if="store.user?.role == 'ADMIN'">
+            <NavLink
+                :icon="PresentationChartBarIcon"
+                title="Metrics"
+                @click="() => openMetrics()"
+            />
+          </li>
 
           <!--dropdown button small screen-->
           <li>
@@ -81,14 +93,14 @@ const handleActiveSidebarComponentChange = (value: string) => {
           </li>
 
           <!--voice call button-->
-          <li>
-            <NavLink
-              :icon="PhoneIcon"
-              title="Call log"
-              @click="() => handleActiveSidebarComponentChange('phone')"
-              :active="store.activeSidebarComponent === 'phone'"
-            />
-          </li>
+<!--          <li>-->
+<!--            <NavLink-->
+<!--              :icon="PhoneIcon"-->
+<!--              title="Call log"-->
+<!--              @click="() => handleActiveSidebarComponentChange('phone')"-->
+<!--              :active="store.activeSidebarComponent === 'phone'"-->
+<!--            />-->
+<!--          </li>-->
 
           <!--settings button small screen-->
           <li class="xs:inline md:hidden">

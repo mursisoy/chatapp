@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { IConversation, IUser } from "@src/types";
+import type {IContact, IConversation, IUser} from "@src/types";
+import { UserPlusIcon } from "@heroicons/vue/24/outline";
+
 import type { Ref } from "vue";
 import { ref } from "vue";
 
@@ -14,6 +16,7 @@ import SearchInput from "@src/components/ui/inputs/SearchInput.vue";
 import Dropdown from "@src/components/ui/navigation/Dropdown/Dropdown.vue";
 import DropdownLink from "@src/components/ui/navigation/Dropdown/DropdownLink.vue";
 import ScrollBox from "@src/components/ui/utils/ScrollBox.vue";
+import {getConversationIndex} from "@src/utils";
 
 const props = defineProps<{
   closeModal: () => void;
@@ -78,6 +81,14 @@ const handleClickOutside = (event: Event) => {
     closeDropdowns();
   }
 };
+
+const deleteMember = (contact: IContact) => {
+  store.updateConversationContacts(props.conversation.id, {
+    id: props.conversation.id,
+    removeContacts: [contact.id],
+    addContacts: []
+  })
+}
 </script>
 
 <template>
@@ -87,7 +98,24 @@ const handleClickOutside = (event: Event) => {
       <Typography id="modal-title" variant="heading-1" class="default-outline">
         Members
       </Typography>
-
+      <template v-if="store.user && (props.conversation.owner.id == store.user.id)">
+        <IconButton
+            @click="
+            $emit('active-page-change', {
+              tabName: 'non-members',
+              animationName: 'slide-left',
+              removeContact: true,
+            })
+          "
+            aria-label="compose conversation"
+            title="compose conversation"
+            class="w-7 h-7"
+        >
+          <UserPlusIcon
+              class="w-[20px] h-[20px] text-indigo-300 hover:text-indigo-400"
+          />
+        </IconButton>
+      </template>
       <button
         @click="
           $emit('active-page-change', {
@@ -128,7 +156,7 @@ const handleClickOutside = (event: Event) => {
         >
           <template
             v-slot:tag
-            v-if="(props.conversation.admins as string[]).includes(contact.id)"
+            v-if="props.conversation.owner.id == contact.id"
           >
             <div class="ml-3">
               <Typography variant="body-4" noColor class="text-indigo-400"
@@ -136,10 +164,9 @@ const handleClickOutside = (event: Event) => {
               >
             </div>
           </template>
-
           <template
             v-slot:menu
-            v-if="store.user && (props.conversation.admins as string[]).includes(store.user.id) && contact.id !== store.user.id"
+            v-if="store.user && (props.conversation.owner.id == store.user.id) && contact.id !== store.user.id"
           >
             <div>
               <!--dropdown menu button-->
@@ -161,11 +188,11 @@ const handleClickOutside = (event: Event) => {
                 :show="(dropdownMenuStates as boolean[])[index]"
                 :position="dropdownMenuPosition"
               >
-                <DropdownLink> Promote to admin </DropdownLink>
+<!--                <DropdownLink> Promote to admin </DropdownLink>-->
 
-                <DropdownLink> Demote to member </DropdownLink>
+<!--                <DropdownLink> Demote to member </DropdownLink>-->
 
-                <DropdownLink color="danger"> Remove contact </DropdownLink>
+                <DropdownLink @click="deleteMember(contact)" color="danger"> Remove from group </DropdownLink>
               </Dropdown>
             </div>
           </template>

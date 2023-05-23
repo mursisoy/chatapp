@@ -18,6 +18,7 @@ import LinkPreview from "@src/components/views/HomeView/Chat/ChatMiddle/Message/
 import MessageContextMenu from "@src/components/views/HomeView/Chat/ChatMiddle/Message/MessageContextMenu.vue";
 import Recording from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Recording.vue";
 import MessagePreview from "@src/components/views/HomeView/Chat/MessagePreview.vue";
+import Media from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Media.vue";
 import Receipt from "@src/components/views/HomeView/Chat/ChatMiddle/Message/Receipt.vue";
 
 const props = defineProps<{
@@ -30,7 +31,7 @@ const props = defineProps<{
   handleDeselectMessage: (messageId: string) => void;
 }>();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 const showContextMenu = ref(false);
 
@@ -53,6 +54,11 @@ const handleShowContextMenu = (event: any) => {
         : event.pageY,
   };
 };
+
+const messageTime = (timestamp: number): string => {
+  let date = new Date(timestamp)
+  return date.getHours() + ":" + date.getMinutes();
+}
 
 // closes the context menu
 const handleCloseContextMenu = () => {
@@ -80,7 +86,7 @@ const hideAvatar = () => {
 };
 
 // Reply message
-const replyMessage = getMessageById(activeConversation, props.message.replyTo);
+const replyMessage = getMessageById(activeConversation.value, props.message.replyTo);
 </script>
 
 <template>
@@ -90,11 +96,11 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
       <div class="mr-4" :class="{ 'ml-[36px]': props.followUp && !divider }">
         <div
           v-if="!hideAvatar()"
-          :aria-label="getFullName(props.message.sender)"
+          :aria-label="props.message.from"
           class="outline-none"
         >
           <div
-            :style="{ backgroundImage: `url(${props.message.sender.avatar})` }"
+            :style="{ backgroundImage: `url(${props.message.from})` }"
             class="w-[36px] h-[36px] bg-cover bg-center rounded-full"
           ></div>
         </div>
@@ -144,22 +150,28 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
           </Typography>
 
           <!--recording-->
-          <div
-            v-else-if="
-              props.message.content && props.message.type === 'recording'
-            "
-          >
-            <Recording
-              :recording="(props.message.content as IRecording)"
-              :self="props.self"
-            />
-          </div>
+<!--          <div-->
+<!--            v-else-if="-->
+<!--              props.message.content && props.message.type === 'recording'-->
+<!--            "-->
+<!--          >-->
+<!--            <Recording-->
+<!--              :recording="(props.message.content as IRecording)"-->
+<!--              :self="props.self"-->
+<!--            />-->
+<!--          </div>-->
 
           <!--attachments-->
           <Attachments
             v-if="(props.message.attachments as [])?.length > 0"
             :message="props.message"
             :self="props.self"
+          />
+
+          <Media
+              v-if="props.message.media"
+              :message="props.message"
+              :self="props.self"
           />
 
           <!--link preview-->
@@ -174,12 +186,12 @@ const replyMessage = getMessageById(activeConversation, props.message.replyTo);
         <!--date-->
         <div :class="props.self ? ['ml-4', 'order-1'] : ['mr-4']">
           <Typography variant="body-1" class="whitespace-pre">
-            {{ props.message.date }}
+            {{ messageTime(props.message.date) }}
           </Typography>
         </div>
 
         <!--read receipt-->
-        <Receipt v-if="props.self" :state="props.message.state" />
+<!--        <Receipt v-if="props.self" :state="props.message.state" />-->
       </div>
     </div>
     <MessageContextMenu

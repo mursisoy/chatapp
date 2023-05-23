@@ -26,7 +26,7 @@ const activeConversation = computed(() => {
 });
 
 // provide the active conversation to all children.
-provide("activeConversation", activeConversation.value);
+provide("activeConversation", activeConversation);
 
 // determines whether select mode is enabled.
 const selectMode = ref(false);

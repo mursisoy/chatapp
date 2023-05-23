@@ -1,21 +1,18 @@
+import {ULID} from "ulid";
+
 export interface IUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar: string;
-  lastSeen: Date;
+  username: string;
+
+  id: string,
   role: string,
-  contacts: IContact[];
+  // contacts: IContact[];
 }
 
 export interface IContact {
   id: string;
-  firstName: string;
-  lastName: string;
-  avatar: string;
-  email: string;
-  lastSeen: Date;
+  username: string;
+  avatar?: string;
+
 }
 
 export interface IPreviewData {
@@ -45,14 +42,16 @@ export interface IRecording {
 }
 
 export interface IMessage {
-  id: string;
+  id: string | null;
   type?: string;
   content?: string | IRecording;
   date: number;
-  sender: IContact;
+  from: string;
+  to: string;
   replyTo?: string;
   previewData?: IPreviewData;
   attachments?: IAttachment[];
+  media?: IMedia
   state: string;
 }
 
@@ -62,8 +61,9 @@ export interface IConversation {
   name?: string;
   avatar?: string;
   admins?: string[];
+  owner?: IContact;
   contacts: IContact[];
-  messages: IMessage[];
+  messages: IMessage[] | undefined;
   pinnedMessage?: IMessage;
   pinnedMessageHidden?: boolean;
   replyMessage?: IMessage;
@@ -111,23 +111,37 @@ export interface IEmoji {
 }
 
 export interface IUserSignUp {
-  email: string;
-  name: string;
-  lastname: string;
+  username: string;
   password: string;
   passwordConfirmation: string;
 }
 
 export interface IUserLogin {
-  email: string;
+  username: string;
   password: string;
 }
 
-export interface IEnvelope {
+export interface ICreateGroup {
+  name: string;
+  contacts: String[]
+}
+
+export interface IMedia {
   id: string,
+  name?: string,
+  size: number,
+  type?: string
+}
+export interface IEnvelope {
   from: string,
   to: string,
   type?: string;
   content?: string | IRecording;
   date: number;
+  media?: IFileUpload
+}
+
+export interface IFileUpload{
+  file?: File | null,
+  caption: string
 }

@@ -1,20 +1,32 @@
 package es.unizar.mii.tmdad.chatapp.dao
 
-import es.unizar.mii.tmdad.chatapp.dao.ChatRoomType
-import es.unizar.mii.tmdad.chatapp.dao.UserEntity
-import org.apache.tomcat.util.http.fileupload.util.mime.MimeUtility
-import org.springframework.util.MimeType
-import java.util.UUID
+import com.fasterxml.uuid.Generators
+import es.unizar.mii.tmdad.chatapp.dto.ConversationFileUploadResponse
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
+import java.util.*
 
-data class ChatMessage (
+
+@Entity
+class ChatMessage (
+    @Id
+//    @GeneratedValue(strategy = GenerationType.UUID)
+    val id: UUID = Generators.timeBasedGenerator().generate(),
+    @Temporal(TemporalType.TIMESTAMP)
     var date: Long,
-    val from: String,
-    val to: String,
-    val isGroup: ChatRoomType?,
+    @Column(name="_to")
+    val to: UUID,
+    @Column(columnDefinition="TEXT")
     val content: String,
-    val media: String?
+    @JdbcTypeCode(SqlTypes.JSON)
+    val media: ConversationFileUploadResponse?,
+    @Column(name="_from_id")
+    val from_id: UUID,
+    @Column(name="_from")
+    val from: String,
 ) {
     override fun toString(): String {
-        return "{date: ${date.toString()}, from: '$from', to: '$to', isGroup: ${isGroup.toString()}, content: '$content'}"
+        return "{date: ${date.toString()}, from: '$from', to: '$to', content: '$content'}"
     }
 }

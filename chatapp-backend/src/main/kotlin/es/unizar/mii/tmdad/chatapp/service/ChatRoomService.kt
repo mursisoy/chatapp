@@ -1,12 +1,10 @@
 package es.unizar.mii.tmdad.chatapp.service
-import es.unizar.mii.tmdad.chatapp.dao.ChatRoom
-import es.unizar.mii.tmdad.chatapp.repository.ChatRoomRepository
 import org.springframework.stereotype.Service
 import java.nio.ByteBuffer
-import java.util.UUID
+import java.util.*
 
 @Service
-class ChatRoomService (private val chatRoomRepository: ChatRoomRepository){
+class ChatRoomService (){
     private fun convertUUIDToBytes(uuid: UUID): ByteArray? {
         val bb = ByteBuffer.wrap(ByteArray(16))
         bb.putLong(uuid.mostSignificantBits)
@@ -31,8 +29,8 @@ class ChatRoomService (private val chatRoomRepository: ChatRoomRepository){
         return UUID(high,low)
     }
 
-    fun save(chatRoom: ChatRoom): ChatRoom {
-        return chatRoomRepository.save(chatRoom)
-    }
+//    fun save(chatRoom: ChatRoom): ChatRoom {
+//        return chatRoomRepository.save(chatRoom)
+//    }
 
 }

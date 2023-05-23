@@ -1,5 +1,5 @@
 
-localhost:80 {
+localhost {
 	encode gzip
 
 	handle /api/* {
@@ -8,6 +8,10 @@ localhost:80 {
 
 	handle /ws {
 	    reverse_proxy backend:8080
+	}
+
+	handle /grafana/* {
+	    reverse_proxy grafana:3000
 	}
 
 	handle {

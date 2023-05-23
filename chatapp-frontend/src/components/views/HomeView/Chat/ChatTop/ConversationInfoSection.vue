@@ -4,7 +4,7 @@ import type { IConversation } from "@src/types";
 import { activeCall } from "@src/store/defaults";
 import useStore from "@src/store/store";
 import { getAvatar, getName } from "@src/utils";
-import { inject, ref } from "vue";
+import {inject, Ref, ref} from "vue";
 
 import {
   ChevronLeftIcon,
@@ -27,7 +27,7 @@ const props = defineProps<{
 
 const store = useStore();
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 const showDropdown = ref(false);
 

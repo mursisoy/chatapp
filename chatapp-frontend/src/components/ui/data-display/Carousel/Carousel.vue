@@ -23,7 +23,7 @@ const carousel: Ref<HTMLElement | undefined> = ref();
 const { activate, deactivate } = useFocusTrap(carousel);
 
 // the active conversation
-const conversation = <IConversation>inject("activeConversation");
+const conversation = <Ref<IConversation>>inject("activeConversation");
 
 // index of the current open attachment in the
 const currentIndex = ref(0);
@@ -35,8 +35,8 @@ const moved = ref(false);
 const attachments = computed(() => {
   let attachments = [];
 
-  if (conversation) {
-    for (let message of conversation.messages) {
+  if (conversation.value && conversation.value.messages) {
+    for (let message of conversation.value.messages) {
       if (message.attachments && hasAttachments(message)) {
         for (let attachment of message.attachments) {
           if (["video", "image"].includes(attachment.type)) {

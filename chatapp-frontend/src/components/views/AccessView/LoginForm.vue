@@ -14,7 +14,7 @@ import router from "@src/router";
 const showPassword = ref(false);
 
 const loginFormData = ref<IUserLogin>({
-  email: "",
+  username: "",
   password: ""
 });
 
@@ -51,8 +51,8 @@ const updateLoginFormData = (data: IUserLogin) => {
       <!--form-->
       <form @submit.prevent="login">
       <div class="mb-6">
-        <TextInput label="Email" placeholder="Enter your email" :value="loginFormData.email"
-                   @input="updateLoginFormData({...loginFormData, email: $event.target.value})" class="mb-5" />
+        <TextInput label="Username" placeholder="Enter your username" :value="loginFormData.username"
+                   @input="updateLoginFormData({...loginFormData, username: $event.target.value})" class="mb-5" />
         <TextInput
           label="Password"
           placeholder="Enter your password"
@@ -86,32 +86,9 @@ const updateLoginFormData = (data: IUserLogin) => {
         <Button class="w-full mb-4" type="submit">Sign in</Button>
       </div>
       </form>
-      <!--divider-->
-      <div class="mb-6 flex items-center">
-        <span
-          class="w-full border border-dashed border-gray-100 dark:border-gray-600 rounded-[1px]"
-        ></span>
-        <Typography variant="body-3" class="px-4 text-opacity-75 font-light"
-          >or</Typography
-        >
-        <span
-          class="w-full border border-dashed border-gray-100 dark:border-gray-600 rounded-[1px]"
-        ></span>
-      </div>
 
       <!--oauth controls-->
       <div>
-        <Button variant="outlined" class="w-full mb-5">
-          <span class="flex">
-            <img
-              src="@src/assets/vectors/google-logo.svg"
-              class="mr-3"
-              alt="google logo"
-            />
-            Sign in with google
-          </span>
-        </Button>
-
         <!--bottom text-->
         <div class="flex justify-center">
           <Typography variant="body-2"

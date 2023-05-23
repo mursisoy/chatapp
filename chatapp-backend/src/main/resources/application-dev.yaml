@@ -24,6 +24,20 @@ spring:
     driver-class-name: "org.postgresql.Driver"
     username: "chatapp"
     password: "chatapp"
+  rabbitmq-amqp:
+    ssl: false
+    host: "rabbitmq"
+    port: 5672
+    user: "guest"
+    password: "guest"
+    vhost: "/"
+  rabbitmq-http:
+    ssl: false
+    host: "rabbitmq"
+    port: 15672
+    user: "guest"
+    password: "guest"
+    vhost: "/"
   config:
     activate:
       on-profile: "dev"

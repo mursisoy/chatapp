@@ -13,20 +13,8 @@ const emit = defineEmits(['update:modelValue','activeSectionChange']);
   <div>
     <!--form-->
     <div class="mb-5">
-      <TextInput label="Email" placeholder="Enter your email" class="mb-5" :value="modelValue.email"
-                 @input="$emit('update:modelValue', {...modelValue, email: $event.target.value})"/>
-      <TextInput
-        label="First Name"
-        placeholder="Enter your first name"
-        class="mb-5" :value="modelValue.name"
-        @input="$emit('update:modelValue', {...modelValue,name: $event.target.value})"
-      />
-      <TextInput
-        label="Last Name"
-        placeholder="Enter your last name"
-        class="mb-5" :value="modelValue.lastname"
-        @input="$emit('update:modelValue', {...modelValue,lastname: $event.target.value})"
-      />
+      <TextInput label="Username" placeholder="Enter your username" class="mb-5" :value="modelValue.username"
+                 @input="$emit('update:modelValue', {...modelValue, username: $event.target.value})"/>
     </div>
 
     <!--local controls-->
@@ -44,29 +32,5 @@ const emit = defineEmits(['update:modelValue','activeSectionChange']);
       >
     </div>
 
-    <!--divider-->
-    <div class="mb-6 flex items-center">
-      <span
-        class="w-full border border-dashed border-gray-100 dark:border-gray-600 rounded-[1px]"
-      ></span>
-      <Typography variant="body-3" class="px-4 text-opacity-75 font-light"
-        >or</Typography
-      >
-      <span
-        class="w-full border border-dashed border-gray-100 dark:border-gray-600 rounded-[1px]"
-      ></span>
-    </div>
-
-    <!--oauth controls-->
-    <Button variant="outlined" class="w-full mb-5" type="button">
-      <span class="flex">
-        <img
-          src="@src/assets/vectors/google-logo.svg"
-          class="mr-3"
-          alt="google-logo"
-        />
-        Sign in with google
-      </span>
-    </Button>
   </div>
 </template>

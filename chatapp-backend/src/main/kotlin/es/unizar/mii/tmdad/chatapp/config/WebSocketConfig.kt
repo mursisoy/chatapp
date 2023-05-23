@@ -4,10 +4,8 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.Message
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver
-import org.springframework.messaging.simp.SimpMessageType
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.authorization.SpringAuthorizationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,8 +17,8 @@ import org.springframework.security.messaging.context.SecurityContextChannelInte
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler
-import java.security.Principal
 
 
 @Configuration
@@ -40,11 +38,15 @@ class WebSocketConfig(
         registry.addEndpoint("/ws")
             .setAllowedOrigins("*")
             .setHandshakeHandler(DefaultHandshakeHandler())
+        registry.setErrorHandler(StompSubProtocolErrorHandler())
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        registry.setApplicationDestinationPrefixes("/chat");
-        registry.enableSimpleBroker("queue");
+        registry.setApplicationDestinationPrefixes("/chat")
+//        registry.enableSimpleBroker("/queue/messages");
+        registry.enableSimpleBroker("/queue")
+//        registry.setUserDestinationPrefix("/user");
+//        registry.enableSimpleBroker("cmd")
     }
 
     override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver?>) {
@@ -70,6 +72,7 @@ class WebSocketConfig(
     fun messageAuthorizationManager(messages: MessageMatcherDelegatingAuthorizationManager.Builder): AuthorizationManager<Message<*>> {
         messages
             .simpMessageDestMatchers("/chat/broadcast").hasRole("ADMIN")
+//            .simpSubscribeDestMatchers("/queue/**").denyAll()
             .anyMessage().authenticated()
         return messages.build()
     }

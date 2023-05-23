@@ -18,22 +18,25 @@ const store = useStore();
 
 const container: Ref<HTMLElement | null> = ref(null);
 
-const activeConversation = <IConversation>inject("activeConversation");
+const activeConversation = <Ref<IConversation>>inject("activeConversation");
 
 // checks whether the previous message was sent by the same user.
 const isFollowUp = (index: number, previousIndex: number): boolean => {
   if (previousIndex < 0) {
     return false;
   } else {
-    let previousSender = activeConversation.messages[previousIndex].sender.id;
-    let currentSender = activeConversation.messages[index].sender.id;
-    return previousSender === currentSender;
+    if (activeConversation.value.messages ) {
+      let previousSender = activeConversation.value.messages[previousIndex].from;
+      let currentSender = activeConversation.value.messages[index].from;
+      return previousSender === currentSender;
+    }
+    return false;
   }
 };
 
 // checks whether the message is sent by the authenticated user.
 const isSelf = (message: IMessage): boolean => {
-  return Boolean(store.user && message.sender.id === store.user.id);
+  return Boolean(store.user && message.from === store.user.username);
 };
 
 // checks wether the new message has been sent in a new day or not.
