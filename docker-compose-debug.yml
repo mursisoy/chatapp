@@ -43,7 +43,7 @@ services:
         - type: bind
           source: ./chatapp-frontend
           target: /app
-        - node_modules:/app/node_modules
+#        - node_modules:/app/node_modules
 
   backend:
     image: chatapp-backend:0.0.1-SNAPSHOT-debug
