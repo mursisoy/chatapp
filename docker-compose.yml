@@ -4,29 +4,88 @@ services:
   db:
     image: postgres
     restart: always
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_DB: chatapp
+      POSTGRES_USER: chatapp
+      POSTGRES_PASSWORD: chatapp
+
   adminer:
     image: adminer
     restart: always
     ports:
       - "8080:8080"
+
   caddy:
     image: caddy:2.6.4
     restart: unless-stopped
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - ./chatapp-frontend/dist:/app
+      - ./caddy/Caddyfile_debug:/etc/caddy/Caddyfile
     ports:
       - "80:80"
       - "443:443"
+
+  frontend:
+    build:
+      context: ./chatapp-frontend
+      dockerfile: Dockerfile_dev
+    volumes:
+      - type: bind
+        source: ./chatapp-frontend
+        target: /app
+  #        - node_modules:/app/node_modules
+
   backend:
-    image: chatapp-backend:0.0.1-SNAPSHOT
+    image: chatapp-backend:0.0.1-SNAPSHOT-debug
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: "PROD"
+    deploy:
+      replicas: 3
 
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://chatapp:chatapp@db:5432/chatapp?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/queries/queries.yaml"
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      PG_EXPORTER_EXCLUDE_DATABASES: "template0,template1"
+      PG_EXPORTER_CONSTANT_LABELS: "cluster_name=local"
+    volumes:
+      - ./postgres-exporter/:/queries
+#    ports:
+#      - "9187:9187"
 
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+  prometheus:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./volumes/prometheus_data:/prometheus
+      - ./prometheus-config/:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    depends_on:
+      - db
+      - postgres-exporter
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    user: root
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./volumes/grafana/:/var/lib/grafana
+      - ./grafana:/etc/grafana
