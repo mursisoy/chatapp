@@ -7,6 +7,7 @@ import es.unizar.mii.tmdad.chatapp.dto.AuthenticationResponse
 import es.unizar.mii.tmdad.chatapp.dto.RegisterRequest
 import es.unizar.mii.tmdad.chatapp.exception.UserNotFoundException
 import es.unizar.mii.tmdad.chatapp.service.JwtService
+import es.unizar.mii.tmdad.chatapp.service.RabbitService
 import es.unizar.mii.tmdad.chatapp.service.UserService
 import io.jsonwebtoken.Claims
 import jakarta.validation.Valid
@@ -16,7 +17,9 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
+import java.sql.SQLException
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,12 +27,25 @@ class AuthController(
     private val userService: UserService,
     private val authenticationManager: AuthenticationManager,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val rabbitService: RabbitService
 ) {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException::class)
     fun handleNotFoundException(e: UserNotFoundException): ResponseEntity<Map<String, String?>> {
-        return ResponseEntity(mapOf("message" to e.message), HttpStatus.FORBIDDEN)
+        return ResponseEntity(mapOf("message" to "Authorization denied"), HttpStatus.NOT_FOUND)
+    }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(SQLException::class)
+    fun handleSQLException(e: SQLException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleSQLException(e: MethodArgumentNotValidException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.BAD_REQUEST)
     }
 
     @PostMapping("/register")

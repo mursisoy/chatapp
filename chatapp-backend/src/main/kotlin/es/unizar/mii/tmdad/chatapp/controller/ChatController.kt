@@ -9,7 +9,6 @@ import es.unizar.mii.tmdad.chatapp.dto.*
 import es.unizar.mii.tmdad.chatapp.exception.ChatAuthorizationException
 import es.unizar.mii.tmdad.chatapp.repository.MessageRepository
 import es.unizar.mii.tmdad.chatapp.service.*
-nimport jakarta.validation.Valid
 import org.apache.commons.io.IOUtils
 import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException
 import org.slf4j.LoggerFactory
@@ -17,6 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
@@ -25,7 +25,9 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 import java.util.*
@@ -52,6 +54,25 @@ class ChatController(
     fun handleSizeSizeLimitExceededException(e: SizeLimitExceededException): ResponseEntity<Map<String, String?>> {
         return ResponseEntity(mapOf("message" to e.message), HttpStatus.PAYLOAD_TOO_LARGE)
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleSQLException(e: MethodArgumentNotValidException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.BAD_REQUEST)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleSQLException(e: MethodArgumentTypeMismatchException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.BAD_REQUEST)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleSQLException(e: HttpMessageNotReadableException): ResponseEntity<Map<String, String?>> {
+        return ResponseEntity(mapOf("message" to e.message), HttpStatus.BAD_REQUEST)
+    }
+
 
     @GetMapping("contacts")
     fun getContacts(principal: Principal, authentication: Authentication): ResponseEntity<ContactListResponse> {
@@ -190,7 +211,7 @@ class ChatController(
         val contacts = contactSet.map { userService.loadUserById(it) }.toSet()
 
         if (chatRoomRequest.type == ChatRoomType.BROADCAST) {
-            return ResponseEntity.badRequest().build()
+            return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).build()
         } else if (chatRoomRequest.type == ChatRoomType.COUPLE) {
             if (contacts.size != 2) {
                 return ResponseEntity.unprocessableEntity().build()
@@ -312,14 +333,12 @@ class ChatController(
 
     @MessageMapping("/message")
     fun message(
-        @Valid @Payload draftMessage: ChatMessageRequest,
+        @Payload draftMessage: ChatMessageRequest,
         authentication: Authentication,
         @Header(StompHeaderAccessor.STOMP_RECEIPT_HEADER) receiptId: String
     ) {
-
-
         val loggedInUser = authentication.principal as UserEntity
-        val conversationId = UUID.fromString(draftMessage.to)
+        val conversationId = draftMessage.to
         val newMessage = ChatMessage(
             id = Generators.timeBasedGenerator().generate(),
             date = draftMessage.date,
@@ -330,17 +349,48 @@ class ChatController(
             media = draftMessage.media
         )
 
+        val isBroadcast = conversationId == rns.BROADCAST_QUEUE_ID
+        val isAuthorized = rabbitManageService.authorizeSendToGroup(
+                                rns.getConversationExchangeName(conversationId),
+                                rns.getUserExchangeName(loggedInUser.id)
+                            )
+        val isAdmin = authentication.authorities.stream().anyMatch { a -> a.authority.equals("ADMIN") }
 
-        if ((conversationId != rns.BROADCAST_QUEUE_ID &&
-                    rabbitManageService.authorizeSendToGroup(
-                        rns.getConversationExchangeName(conversationId),
-                        rns.getUserExchangeName(loggedInUser.id)
-                    ) ||
-                    (conversationId == rns.BROADCAST_QUEUE_ID &&
-                            authentication.authorities.stream().anyMatch { a -> a.authority.equals("ADMIN") })
+        if (draftMessage.content.length < 2 || draftMessage.content.length > 500) {
+            val headers = StompHeaderAccessor.create(
+                StompCommand.MESSAGE,
+                mapOf("status-code" to listOf(HttpStatus.BAD_REQUEST.value().toString()))
+            )
+            headers.receiptId = receiptId
+            simpMessageSendingOperations.convertAndSendToUser(
+                loggedInUser.username, "/queue/notifications",
+                ChatNotification(
+                    type = ChatNotificationType.ERROR,
+                    content = if (draftMessage.content.length < 2) "Message tooshort" else "Message too long"
+                ), headers.messageHeaders
+            )
+            return
+        }
 
-                    )
-        ) {
+
+        if (isBroadcast && newMessage.media != null) {
+            val headers = StompHeaderAccessor.create(
+                StompCommand.MESSAGE,
+                mapOf("status-code" to listOf(HttpStatus.BAD_REQUEST.value().toString()))
+            )
+            headers.receiptId = receiptId
+            simpMessageSendingOperations.convertAndSendToUser(
+                loggedInUser.username, "/queue/notifications",
+                ChatNotification(
+                    type = ChatNotificationType.ERROR,
+                    content = "Cannot send media to this group"
+                ), headers.messageHeaders
+            )
+            return
+        }
+
+        if ((!isBroadcast && isAuthorized) ||
+            (isBroadcast  && isAdmin)) {
             // Use StompCommand.RECEIPT if SimpleStompBroker were compatible :(
 //            val headers = StompHeaderAccessor.create(StompCommand.MESSAGE)
 //            headers.receiptId = receiptId
@@ -381,7 +431,8 @@ class ChatController(
         @RequestParam("file") file: MultipartFile
     ): ResponseEntity<ConversationFileUploadResponse?> {
         val loggedInUser = authentication.principal as UserEntity
-        return if (rabbitManageService.authorizeSendToGroup(
+        val isBroadcast = conversationId == rns.BROADCAST_QUEUE_ID
+        return if (!isBroadcast && rabbitManageService.authorizeSendToGroup(
                 rns.getConversationExchangeName(conversationId),
                 rns.getUserExchangeName(loggedInUser.id)
             )
@@ -412,6 +463,7 @@ class ChatController(
         @PathVariable fileId: UUID
     ): ResponseEntity<ByteArray> {
         val loggedInUser = authentication.principal as UserEntity
+
         return if (rabbitManageService.authorizeSendToGroup(
                 rns.getConversationExchangeName(conversationId),
                 rns.getUserExchangeName(loggedInUser.id)
