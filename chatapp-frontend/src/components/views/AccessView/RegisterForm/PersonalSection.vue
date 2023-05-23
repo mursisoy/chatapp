@@ -14,7 +14,7 @@ const emit = defineEmits(['update:modelValue','activeSectionChange']);
     <!--form-->
     <div class="mb-5">
       <TextInput label="Username" placeholder="Enter your username" class="mb-5" :value="modelValue.username"
-                 @input="$emit('update:modelValue', {...modelValue, email: $event.target.value})"/>
+                 @input="$emit('update:modelValue', {...modelValue, username: $event.target.value})"/>
     </div>
 
     <!--local controls-->
