@@ -356,7 +356,7 @@ class ChatController(
                             )
         val isAdmin = authentication.authorities.stream().anyMatch { a -> a.authority.equals("ADMIN") }
 
-        if (draftMessage.content.length < 2 || draftMessage.content.length > 500) {
+        if (draftMessage.content.length > 500) {
             val headers = StompHeaderAccessor.create(
                 StompCommand.MESSAGE,
                 mapOf("status-code" to listOf(HttpStatus.BAD_REQUEST.value().toString()))
