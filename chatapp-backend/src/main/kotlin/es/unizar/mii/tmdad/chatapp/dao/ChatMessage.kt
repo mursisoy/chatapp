@@ -17,6 +17,7 @@ class ChatMessage (
     var date: Long,
     @Column(name="_to")
     val to: UUID,
+    @Column(columnDefinition="TEXT")
     val content: String,
     @JdbcTypeCode(SqlTypes.JSON)
     val media: ConversationFileUploadResponse?,
